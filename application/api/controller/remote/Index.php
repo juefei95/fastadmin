@@ -42,7 +42,10 @@ class Index extends Api
         try {
             $service = new RemoteMemberService();
             $userId = $this->auth->id;
-            $member = $service->grantTrial($userId);
+            $member = $service->getMember($userId);
+            if (!$member || (int)$member['trial_given'] === 0) {
+                $member = $service->grantTrial($userId);
+            }
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }
