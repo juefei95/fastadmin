@@ -53,7 +53,7 @@ class Package extends Model
 
     public function getStatusList()
     {
-        return ['30' => __('Status 30')];
+        return ['normal' => __('Normal'), 'hidden' => __('Hidden')];
     }
 
 

@@ -9,6 +9,8 @@ return [
     'Recommended 0' => '否',
     'Recommended 1' => '是',
     'Status'        => '状态',
+    'Normal'        => '正常',
+    'Hidden'        => '隐藏',
     'Weigh'         => '权重',
     'Description'   => '客户端展示文案',
     'Createtime'    => '创建时间',

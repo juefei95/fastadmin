@@ -32,7 +32,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'days', title: __('Days')},
                         {field: 'price', title: __('Price'), operate:'BETWEEN'},
                         {field: 'recommended', title: __('Recommended'), searchList: {"0":__('Recommended 0'),"1":__('Recommended 1')}, formatter: Table.api.formatter.normal},
-                        {field: 'status', title: __('Status'), searchList: {"30":__('Status 30')}, formatter: Table.api.formatter.status},
+                        {field: 'status', title: __('Status'), searchList: {"normal":__('Normal'),"hidden":__('Hidden')}, formatter: Table.api.formatter.status},
                         {field: 'weigh', title: __('Weigh'), operate: false},
                         {field: 'description', title: __('Description'), operate: 'LIKE', table: table, class: 'autocontent', formatter: Table.api.formatter.content},
                         {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', autocomplete:false, formatter: Table.api.formatter.datetime},
