@@ -20,7 +20,11 @@ class Index extends Api
             $this->error(__('User center already closed'));
         }
 
-        if (!$this->request->isPost()) {
+        $action = strtolower($this->request->action());
+        if ($action === 'login' && !$this->request->isPost()) {
+            $this->error(__('Invalid parameters'));
+        }
+        if ($action === 'status' && !$this->request->isGet()) {
             $this->error(__('Invalid parameters'));
         }
     }
@@ -59,6 +63,27 @@ class Index extends Api
                 'expire_time'       => $member && $member['expire_time'] ? date('Y-m-d H:i:s', (int)$member['expire_time']) : null,
                 'remaining_seconds' => $member && $member['expire_time'] ? max(0, (int)$member['expire_time'] - time()) : 0,
             ],
+        ]);
+    }
+
+    public function status()
+    {
+        try {
+            $service = new RemoteMemberService();
+            $userId = $this->auth->id;
+            $member = $service->getMember($userId);
+            $canControl = $service->canControl($userId);
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+
+        $expireTime = $member && $member['expire_time'] ? (int)$member['expire_time'] : 0;
+        $this->success('', [
+            'can_control'       => $canControl,
+            'trial_given'       => $member ? (int)$member['trial_given'] : 0,
+            'control_enabled'   => $member ? (int)$member['control_enabled'] : 0,
+            'expire_time'       => $expireTime ? date('Y-m-d H:i:s', $expireTime) : null,
+            'remaining_seconds' => $expireTime ? max(0, $expireTime - time()) : 0,
         ]);
     }
 }
