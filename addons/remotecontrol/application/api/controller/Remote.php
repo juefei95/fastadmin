@@ -9,7 +9,7 @@ use think\Exception;
 
 class Remote extends remote\Index
 {
-    protected $noNeedLogin = ['login', 'packages', 'payment'];
+    protected $noNeedLogin = ['login', 'packages', 'payment', 'client'];
     protected $noNeedRight = '*';
 
     public function order()
@@ -48,6 +48,23 @@ class Remote extends remote\Index
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }
+    }
+
+    public function client()
+    {
+        $pathinfo = strtolower(trim($this->request->pathinfo(), '/'));
+        if ($pathinfo !== 'api/remote/client/config' || !$this->request->isGet()) {
+            $this->error(__('Invalid parameters'));
+        }
+
+        $config = get_addon_config('remotecontrol');
+        $this->success('', [
+            'id_server'      => (string)($config['id_server'] ?? ''),
+            'relay_server'   => (string)($config['relay_server'] ?? ''),
+            'public_key'     => (string)($config['public_key'] ?? ''),
+            'latest_version' => (string)($config['latest_version'] ?? ''),
+            'min_version'    => (string)($config['min_version'] ?? ''),
+        ]);
     }
 
     protected function createOrder()
