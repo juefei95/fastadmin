@@ -75,6 +75,12 @@ class RemotePaymentService
             $data['total_fee'] = $data['amount']['total'];
         }
 
+        return $this->handleVerifiedNotify($payType, $data, $pay);
+    }
+
+    public function handleVerifiedNotify($payType, array $data, $pay = null)
+    {
+        $payType = $this->normalizePayType($payType);
         $orderNo = $this->getNotifyOrderNo($data);
         $payAmount = $this->getNotifyAmount($payType, $data);
         $order = $this->orderService->getOrder($orderNo);
@@ -85,7 +91,10 @@ class RemotePaymentService
             throw new Exception('Payment amount mismatch');
         }
 
-        $this->orderService->markPaid($orderNo);
+        $order = $this->orderService->markPaid($orderNo);
+        if (!$pay) {
+            return $order;
+        }
 
         if (\addons\epay\library\Service::isVersionV3()) {
             return $pay->success()->getBody()->getContents();
