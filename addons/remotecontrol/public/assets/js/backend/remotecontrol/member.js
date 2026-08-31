@@ -45,7 +45,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             buttons: [
                                 {name: 'adddays1', text: __('Add 1 day'), title: __('Add 1 day'), classname: 'btn btn-xs btn-success btn-ajax', icon: 'fa fa-plus', url: 'remotecontrol/member/adddays?days=1', confirm: __('Are you sure you want to add %s day?', 1), refresh: true},
                                 {name: 'adddays7', text: __('Add 7 days'), title: __('Add 7 days'), classname: 'btn btn-xs btn-info btn-ajax', icon: 'fa fa-plus', url: 'remotecontrol/member/adddays?days=7', confirm: __('Are you sure you want to add %s days?', 7), refresh: true},
-                                {name: 'adddays30', text: __('Add 30 days'), title: __('Add 30 days'), classname: 'btn btn-xs btn-warning btn-ajax', icon: 'fa fa-plus', url: 'remotecontrol/member/adddays?days=30', confirm: __('Are you sure you want to add %s days?', 30), refresh: true}
+                                {name: 'adddays30', text: __('Add 30 days'), title: __('Add 30 days'), classname: 'btn btn-xs btn-warning btn-ajax', icon: 'fa fa-plus', url: 'remotecontrol/member/adddays?days=30', confirm: __('Are you sure you want to add %s days?', 30), refresh: true},
+                                {name: 'adddays', text: __('Custom add'), title: __('Custom add'), classname: 'btn btn-xs btn-primary btn-dialog', icon: 'fa fa-plus-square', url: 'remotecontrol/member/adddays', refresh: true},
+                                {name: 'setexpire', text: __('Set expire time'), title: __('Set expire time'), classname: 'btn btn-xs btn-default btn-dialog', icon: 'fa fa-clock-o', url: 'remotecontrol/member/setexpire', refresh: true},
+                                {name: 'enable', text: __('Enable control'), title: __('Enable control'), classname: 'btn btn-xs btn-success btn-ajax', icon: 'fa fa-check', url: 'remotecontrol/member/enable', confirm: __('Are you sure you want to enable control?'), refresh: true, hidden: function (row) { return row.control_enabled == 1; }},
+                                {name: 'disable', text: __('Disable control'), title: __('Disable control'), classname: 'btn btn-xs btn-danger btn-ajax', icon: 'fa fa-ban', url: 'remotecontrol/member/disable', confirm: __('Are you sure you want to disable control?'), refresh: true, hidden: function (row) { return row.control_enabled != 1; }}
                             ],
                             formatter: Table.api.formatter.operate
                         }
@@ -60,6 +64,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
         },
         edit: function () {
+            Controller.api.bindevent();
+        },
+        adddays: function () {
+            Controller.api.bindevent();
+        },
+        setexpire: function () {
             Controller.api.bindevent();
         },
         api: {

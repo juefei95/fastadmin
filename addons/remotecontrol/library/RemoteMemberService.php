@@ -95,6 +95,23 @@ class RemoteMemberService
         return $this->setControlEnabled($userId, 1);
     }
 
+    public function setExpire($userId, $expireTime)
+    {
+        $userId = $this->normalizeUserId($userId);
+        $expireTime = $this->normalizeExpireTime($expireTime);
+        $member = $this->getMember($userId);
+        if (!$member) {
+            $member = $this->createMember($userId);
+        }
+
+        Db::name('remote_member')->where('user_id', $userId)->update([
+            'expire_time' => $expireTime,
+            'updated_at'  => time(),
+        ]);
+
+        return $this->getMember($userId);
+    }
+
     public function getMember($userId)
     {
         return Db::name('remote_member')->where('user_id', (int)$userId)->find();
@@ -167,6 +184,21 @@ class RemoteMemberService
             throw new Exception('User ID must be greater than 0');
         }
         return $userId;
+    }
+
+    protected function normalizeExpireTime($expireTime)
+    {
+        if (is_numeric($expireTime)) {
+            $expireTime = (int)$expireTime;
+        } else {
+            $expireTime = strtotime((string)$expireTime);
+        }
+
+        if (!$expireTime) {
+            throw new Exception('Expire time is invalid');
+        }
+
+        return $expireTime;
     }
 
     protected function getTrialDays()

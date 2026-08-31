@@ -34,11 +34,16 @@ class Member extends Backend
     public function adddays($ids = null)
     {
         $ids = $ids ?: $this->request->param('ids');
-        $days = $this->request->param('days/d', 0);
-
         if (!$ids) {
             $this->error(__('Parameter %s can not be empty', 'ids'));
         }
+
+        $days = $this->request->param('days/d', 0);
+        if (false === $this->request->isPost() && !$days) {
+            $this->view->assign('ids', $ids);
+            return $this->view->fetch();
+        }
+
         if ($days <= 0) {
             $this->error(__('Days must be greater than 0'));
         }
@@ -51,6 +56,75 @@ class Member extends Backend
         try {
             $service = new RemoteMemberService();
             $service->addDays($row['user_id'], $days);
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+
+        $this->success(__('Operate successful'));
+    }
+
+    /**
+     * 设置到期时间
+     */
+    public function setexpire($ids = null)
+    {
+        $ids = $ids ?: $this->request->param('ids');
+        if (!$ids) {
+            $this->error(__('Parameter %s can not be empty', 'ids'));
+        }
+
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
+        if (false === $this->request->isPost()) {
+            $this->view->assign('row', $row);
+            return $this->view->fetch();
+        }
+
+        $expireTime = $this->request->param('expire_time');
+        try {
+            $service = new RemoteMemberService();
+            $service->setExpire($row['user_id'], $expireTime);
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+
+        $this->success(__('Operate successful'));
+    }
+
+    /**
+     * 启用控制权限
+     */
+    public function enable($ids = null)
+    {
+        $this->setControlEnabled($ids, true);
+    }
+
+    /**
+     * 禁用控制权限
+     */
+    public function disable($ids = null)
+    {
+        $this->setControlEnabled($ids, false);
+    }
+
+    protected function setControlEnabled($ids, $enabled)
+    {
+        $ids = $ids ?: $this->request->param('ids');
+        if (!$ids) {
+            $this->error(__('Parameter %s can not be empty', 'ids'));
+        }
+
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
+        try {
+            $service = new RemoteMemberService();
+            $enabled ? $service->enable($row['user_id']) : $service->disable($row['user_id']);
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }

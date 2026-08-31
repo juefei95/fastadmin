@@ -67,7 +67,12 @@ class Remotecontrol extends Addons
                         'icon'    => 'fa fa-user',
                         'ismenu'  => 1,
                         'weigh'   => 40,
-                        'sublist' => $this->getCrudMenu('remotecontrol/member'),
+                        'sublist' => array_merge($this->getCrudMenu('remotecontrol/member'), [
+                            ['name' => 'remotecontrol/member/adddays', 'title' => '增加有效期'],
+                            ['name' => 'remotecontrol/member/setexpire', 'title' => '设置到期时间'],
+                            ['name' => 'remotecontrol/member/enable', 'title' => '启用控制权限'],
+                            ['name' => 'remotecontrol/member/disable', 'title' => '禁用控制权限'],
+                        ]),
                     ],
                     [
                         'name'    => 'remotecontrol/package',
@@ -108,7 +113,6 @@ class Remotecontrol extends Addons
             ['name' => $name . '/del', 'title' => '删除'],
             ['name' => $name . '/multi', 'title' => '批量更新'],
             ['name' => $name . '/dragsort', 'title' => '排序'],
-            ['name' => $name . '/adddays', 'title' => '增加有效期'],
         ];
     }
 
