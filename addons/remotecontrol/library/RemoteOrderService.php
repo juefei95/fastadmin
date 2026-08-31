@@ -80,6 +80,50 @@ class RemoteOrderService
         }
     }
 
+    public function getUserOrder($userId, $orderNo)
+    {
+        $userId = (int)$userId;
+        $orderNo = trim((string)$orderNo);
+        if ($userId <= 0) {
+            throw new Exception('User ID must be greater than 0');
+        }
+        if ($orderNo === '') {
+            throw new Exception('Order number is required');
+        }
+
+        $order = Db::name('remote_order')
+            ->where('user_id', $userId)
+            ->where('order_no', $orderNo)
+            ->find();
+        if (!$order) {
+            throw new Exception('Order not found');
+        }
+
+        return $order;
+    }
+
+    public function getStatusText($status)
+    {
+        $list = [
+            0 => '待支付',
+            1 => '已支付',
+            2 => '已关闭',
+            3 => '已退款',
+        ];
+
+        return $list[(int)$status] ?? '未知';
+    }
+
+    public function getStatusList()
+    {
+        return [
+            0 => '待支付',
+            1 => '已支付',
+            2 => '已关闭',
+            3 => '已退款',
+        ];
+    }
+
     protected function buildOrderNo()
     {
         return date('YmdHis') . mt_rand(100000, 999999);

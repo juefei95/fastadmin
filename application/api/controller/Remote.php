@@ -13,7 +13,23 @@ class Remote extends remote\Index
         if (!Config::get('fastadmin.usercenter')) {
             $this->error(__('User center already closed'));
         }
-        if (!$this->request->isPost() || strtolower($this->request->pathinfo()) !== 'api/remote/order/create') {
+
+        $pathinfo = strtolower(trim($this->request->pathinfo(), '/'));
+        if ($pathinfo === 'api/remote/order/create') {
+            $this->createOrder();
+            return;
+        }
+        if ($pathinfo === 'api/remote/order/status') {
+            $this->orderStatus();
+            return;
+        }
+
+        $this->error(__('Invalid parameters'));
+    }
+
+    protected function createOrder()
+    {
+        if (!$this->request->isPost()) {
             $this->error(__('Invalid parameters'));
         }
 
@@ -41,6 +57,29 @@ class Remote extends remote\Index
                 'pay_type'     => $order['pay_type'],
                 'status'       => (int)$order['status'],
                 'createtime'   => (int)$order['createtime'],
+            ],
+        ]);
+    }
+
+    protected function orderStatus()
+    {
+        if (!$this->request->isGet()) {
+            $this->error(__('Invalid parameters'));
+        }
+
+        $orderNo = (string)$this->request->get('order_no', '');
+        try {
+            $service = new RemoteOrderService();
+            $order = $service->getUserOrder($this->auth->id, $orderNo);
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+
+        $this->success('', [
+            'order' => [
+                'order_no'    => $order['order_no'],
+                'status'      => (int)$order['status'],
+                'status_text' => $service->getStatusText($order['status']),
             ],
         ]);
     }
