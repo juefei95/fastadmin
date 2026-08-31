@@ -3,13 +3,14 @@
 namespace app\api\controller\remote;
 
 use addons\remotecontrol\library\RemoteMemberService;
+use addons\remotecontrol\library\RemotePackageService;
 use app\common\controller\Api;
 use think\Config;
 use think\Exception;
 
 class Index extends Api
 {
-    protected $noNeedLogin = ['login'];
+    protected $noNeedLogin = ['login', 'packages'];
     protected $noNeedRight = '*';
 
     public function _initialize()
@@ -25,6 +26,9 @@ class Index extends Api
             $this->error(__('Invalid parameters'));
         }
         if ($action === 'status' && !$this->request->isGet()) {
+            $this->error(__('Invalid parameters'));
+        }
+        if ($action === 'packages' && !$this->request->isGet()) {
             $this->error(__('Invalid parameters'));
         }
     }
@@ -85,5 +89,29 @@ class Index extends Api
             'expire_time'       => $expireTime ? date('Y-m-d H:i:s', $expireTime) : null,
             'remaining_seconds' => $expireTime ? max(0, $expireTime - time()) : 0,
         ]);
+    }
+
+    public function packages()
+    {
+        try {
+            $service = new RemotePackageService();
+            $packages = $service->getEnabledList();
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+
+        $list = [];
+        foreach ($packages as $package) {
+            $list[] = [
+                'id'          => (int)$package['id'],
+                'name'        => $package['name'],
+                'days'        => (int)$package['days'],
+                'price'       => (string)$package['price'],
+                'recommended' => (int)$package['recommended'],
+                'description' => $package['description'],
+            ];
+        }
+
+        $this->success('', ['packages' => $list]);
     }
 }
