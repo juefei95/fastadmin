@@ -2,7 +2,9 @@
 
 namespace app\admin\controller\remotecontrol;
 
+use addons\remotecontrol\library\RemoteMemberService;
 use app\common\controller\Backend;
+use think\Exception;
 
 /**
  * 远控用户权益管理
@@ -24,6 +26,36 @@ class Member extends Backend
         $this->model = new \app\admin\model\remotecontrol\Member;
         $this->view->assign("trialGivenList", $this->model->getTrialGivenList());
         $this->view->assign("controlEnabledList", $this->model->getControlEnabledList());
+    }
+
+    /**
+     * 增加有效期
+     */
+    public function adddays($ids = null)
+    {
+        $ids = $ids ?: $this->request->param('ids');
+        $days = $this->request->param('days/d', 0);
+
+        if (!$ids) {
+            $this->error(__('Parameter %s can not be empty', 'ids'));
+        }
+        if ($days <= 0) {
+            $this->error(__('Days must be greater than 0'));
+        }
+
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
+        try {
+            $service = new RemoteMemberService();
+            $service->addDays($row['user_id'], $days);
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+
+        $this->success(__('Operate successful'));
     }
 
 

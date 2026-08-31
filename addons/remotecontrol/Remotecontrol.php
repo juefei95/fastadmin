@@ -108,6 +108,7 @@ class Remotecontrol extends Addons
             ['name' => $name . '/del', 'title' => '删除'],
             ['name' => $name . '/multi', 'title' => '批量更新'],
             ['name' => $name . '/dragsort', 'title' => '排序'],
+            ['name' => $name . '/adddays', 'title' => '增加有效期'],
         ];
     }
 

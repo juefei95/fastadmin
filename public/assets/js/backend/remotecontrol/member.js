@@ -37,7 +37,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'total_paid', title: __('Total_paid'), operate:'BETWEEN'},
                         {field: 'created_at', title: __('Created_at')},
                         {field: 'updated_at', title: __('Updated_at')},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+                                {name: 'adddays1', text: __('Add 1 day'), title: __('Add 1 day'), classname: 'btn btn-xs btn-success btn-ajax', icon: 'fa fa-plus', url: 'remotecontrol/member/adddays?days=1', confirm: __('Are you sure you want to add %s day?', 1), refresh: true},
+                                {name: 'adddays7', text: __('Add 7 days'), title: __('Add 7 days'), classname: 'btn btn-xs btn-info btn-ajax', icon: 'fa fa-plus', url: 'remotecontrol/member/adddays?days=7', confirm: __('Are you sure you want to add %s days?', 7), refresh: true},
+                                {name: 'adddays30', text: __('Add 30 days'), title: __('Add 30 days'), classname: 'btn btn-xs btn-warning btn-ajax', icon: 'fa fa-plus', url: 'remotecontrol/member/adddays?days=30', confirm: __('Are you sure you want to add %s days?', 30), refresh: true}
+                            ],
+                            formatter: Table.api.formatter.operate
+                        }
                     ]
                 ]
             });

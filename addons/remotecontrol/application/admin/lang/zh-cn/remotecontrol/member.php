@@ -14,5 +14,11 @@ return [
     'Last_paid_at'      => '最近付费时间',
     'Total_paid'        => '累计消费',
     'Created_at'        => '创建时间',
-    'Updated_at'        => '更新时间'
+    'Updated_at'        => '更新时间',
+    'Add 1 day'         => '增加1天',
+    'Add 7 days'        => '增加7天',
+    'Add 30 days'       => '增加30天',
+    'Are you sure you want to add %s day?'  => '确定要增加%s天有效期吗？',
+    'Are you sure you want to add %s days?' => '确定要增加%s天有效期吗？',
+    'Days must be greater than 0'           => '增加天数必须大于0'
 ];
