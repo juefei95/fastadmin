@@ -80,6 +80,21 @@ class RemoteOrderService
         }
     }
 
+    public function closePendingOrder($orderNo)
+    {
+        $order = $this->getOrder($orderNo);
+        if ((int)$order['status'] !== 0) {
+            return $order;
+        }
+
+        Db::name('remote_order')->where('id', (int)$order['id'])->update([
+            'status'     => 2,
+            'updatetime' => time(),
+        ]);
+
+        return Db::name('remote_order')->where('id', (int)$order['id'])->find();
+    }
+
     public function getUserOrder($userId, $orderNo)
     {
         $userId = (int)$userId;
@@ -95,6 +110,21 @@ class RemoteOrderService
             ->where('user_id', $userId)
             ->where('order_no', $orderNo)
             ->find();
+        if (!$order) {
+            throw new Exception('Order not found');
+        }
+
+        return $order;
+    }
+
+    public function getOrder($orderNo)
+    {
+        $orderNo = trim((string)$orderNo);
+        if ($orderNo === '') {
+            throw new Exception('Order number is required');
+        }
+
+        $order = Db::name('remote_order')->where('order_no', $orderNo)->find();
         if (!$order) {
             throw new Exception('Order not found');
         }

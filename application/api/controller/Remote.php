@@ -3,11 +3,15 @@
 namespace app\api\controller;
 
 use addons\remotecontrol\library\RemoteOrderService;
+use addons\remotecontrol\library\RemotePaymentService;
 use think\Config;
 use think\Exception;
 
 class Remote extends remote\Index
 {
+    protected $noNeedLogin = ['login', 'packages', 'payment'];
+    protected $noNeedRight = '*';
+
     public function order()
     {
         if (!Config::get('fastadmin.usercenter')) {
@@ -27,6 +31,25 @@ class Remote extends remote\Index
         $this->error(__('Invalid parameters'));
     }
 
+    public function payment()
+    {
+        if (!Config::get('fastadmin.usercenter')) {
+            $this->error(__('User center already closed'));
+        }
+
+        $pathinfo = strtolower(trim($this->request->pathinfo(), '/'));
+        if ($pathinfo !== 'api/remote/payment/notify' || !$this->request->isPost()) {
+            $this->error(__('Invalid parameters'));
+        }
+
+        try {
+            $service = new RemotePaymentService();
+            return $service->handleNotify($this->request->param('paytype', $this->request->param('type', '')));
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+    }
+
     protected function createOrder()
     {
         if (!$this->request->isPost()) {
@@ -41,7 +64,15 @@ class Remote extends remote\Index
 
         try {
             $service = new RemoteOrderService();
+            $paymentService = new RemotePaymentService($service);
+            $paymentService->ensurePaymentAvailable($payType);
             $order = $service->createPendingOrder($this->auth->id, $packageId, $payType);
+            try {
+                $payment = $paymentService->createPaymentParams($order);
+            } catch (Exception $e) {
+                $service->closePendingOrder($order['order_no']);
+                throw $e;
+            }
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }
@@ -58,6 +89,7 @@ class Remote extends remote\Index
                 'status'       => (int)$order['status'],
                 'createtime'   => (int)$order['createtime'],
             ],
+            'payment' => $payment,
         ]);
     }
 
