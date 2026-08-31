@@ -25,11 +25,10 @@ class RemoteMemberService
                 return $this->getMember($userId);
             }
 
-            $expireTime = $now + $days * 86400;
+            $this->addDaysWithoutTransaction($userId, $days, null, null, $now);
             Db::name('remote_member')->where('user_id', $userId)->update([
                 'trial_given'       => 1,
                 'trial_started_at'  => $now,
-                'expire_time'       => $expireTime,
                 'control_enabled'   => 1,
                 'updated_at'        => $now,
             ]);
