@@ -12,6 +12,15 @@ return [
         'action_begin' => [
             'epay',
         ],
+        'sms_send' => [
+            'txsms',
+        ],
+        'sms_notice' => [
+            'txsms',
+        ],
+        'sms_check' => [
+            'txsms',
+        ],
     ],
     'route' => [],
     'priority' => [],
