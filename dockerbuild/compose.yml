@@ -34,7 +34,7 @@ services:
         condition: service_started
 
   mysql:
-    image: mysql:5.7
+    image: mysql:8.0
     container_name: fastadmin-mysql
     command:
       - --character-set-server=utf8mb4
