@@ -21,9 +21,9 @@ services:
       APP_TRACE: "true"
       DATABASE_TYPE: mysql
       DATABASE_HOSTNAME: mysql
-      DATABASE_DATABASE: fastadmin
-      DATABASE_USERNAME: fastadmin
-      DATABASE_PASSWORD: fastadmin
+      DATABASE_DATABASE: rustdeskdata
+      DATABASE_USERNAME: root
+      DATABASE_PASSWORD: root
       DATABASE_HOSTPORT: "3306"
       DATABASE_PREFIX: fa_
       DATABASE_DEBUG: "true"
@@ -47,7 +47,7 @@ services:
       - ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: fastadmin
+      MYSQL_DATABASE: rustdeskdata
       MYSQL_USER: fastadmin
       MYSQL_PASSWORD: fastadmin
       TZ: Asia/Shanghai
