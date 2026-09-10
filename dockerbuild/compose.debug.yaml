@@ -3,7 +3,7 @@ name: fastadmin-rustdesk-debug
 services:
   web:
     image: webdevops/php-dev:7.4
-    container_name: fastadmin-debug-web
+    container_name: fastadmin-rustdesk-debug-web
     working_dir: /app
     command: php -S 0.0.0.0:8000 -t public
     ports:
@@ -33,7 +33,7 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: fastadmin-debug-mysql
+    container_name: fastadmin-rustdesk-debug-mysql
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
@@ -55,7 +55,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin:5
-    container_name: fastadmin-debug-phpmyadmin
+    container_name: fastadmin-rustdesk-debug-phpmyadmin
     ports:
       - "8081:80"
     environment:
