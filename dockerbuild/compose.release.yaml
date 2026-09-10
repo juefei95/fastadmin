@@ -24,9 +24,15 @@ services:
       mysql:
         condition: service_healthy
     volumes:
-      - ../:/app:ro
+      - ../:/app
       - fastadmin-release-uploads:/app/public/uploads
       - fastadmin-release-runtime:/app/runtime
+    command: >
+      bash -c "
+        chmod -R 777 /app/public/uploads &&
+        chmod -R 777 /app/runtime &&      
+        exec supervisord
+      "      
 
   mysql:
     image: mysql:8.0
