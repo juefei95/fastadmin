@@ -1,4 +1,4 @@
-name: fastadmin-debug
+name: fastadmin-rustdesk-debug
 
 services:
   web:

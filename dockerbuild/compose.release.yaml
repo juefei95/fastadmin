@@ -1,4 +1,4 @@
-name: fastadmin-release
+name: fastadmin-rustdesk-release
 
 services:
   web:
