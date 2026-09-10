@@ -1,0 +1,57 @@
+name: fastadmin-release
+
+services:
+  web:
+    image: webdevops/php-apache:7.4
+    container_name: fastadmin-release-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      PHP_DATE_TIMEZONE: Asia/Shanghai
+      WEB_DOCUMENT_ROOT: /app/public
+      APP_DEBUG: "false"
+      APP_TRACE: "false"
+      DATABASE_TYPE: mysql
+      DATABASE_HOSTNAME: mysql
+      DATABASE_DATABASE: rustdeskdata
+      DATABASE_USERNAME: fastadmin
+      DATABASE_PASSWORD: fastadmin
+      DATABASE_HOSTPORT: "3306"
+      DATABASE_PREFIX: fa_
+      DATABASE_DEBUG: "false"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ../:/app:ro
+      - fastadmin-release-uploads:/app/public/uploads
+      - fastadmin-release-runtime:/app/runtime
+
+  mysql:
+    image: mysql:8.0
+    container_name: fastadmin-release-mysql
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --sql-mode=NO_ENGINE_SUBSTITUTION
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: rustdeskdata
+      MYSQL_USER: fastadmin
+      MYSQL_PASSWORD: fastadmin
+      TZ: Asia/Shanghai
+    volumes:
+      - fastadmin-release-mysql-data:/var/lib/mysql
+      - ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  fastadmin-release-mysql-data:
+  fastadmin-release-runtime:
+  fastadmin-release-uploads:

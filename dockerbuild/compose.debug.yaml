@@ -1,9 +1,9 @@
-name: fastadmin
+name: fastadmin-debug
 
 services:
   web:
     image: webdevops/php-dev:7.4
-    container_name: fastadmin-web
+    container_name: fastadmin-debug-web
     working_dir: /app
     command: php -S 0.0.0.0:8000 -t public
     ports:
@@ -30,12 +30,10 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      redis:
-        condition: service_started
 
   mysql:
     image: mysql:8.0
-    container_name: fastadmin-mysql
+    container_name: fastadmin-debug-mysql
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
@@ -57,17 +55,9 @@ services:
       timeout: 3s
       retries: 20
 
-  redis:
-    image: redis:7-alpine
-    container_name: fastadmin-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - fastadmin-redis-data:/data
-
   phpmyadmin:
     image: phpmyadmin:5
-    container_name: fastadmin-phpmyadmin
+    container_name: fastadmin-debug-phpmyadmin
     ports:
       - "8081:80"
     environment:
@@ -79,6 +69,3 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-
-volumes:
-  fastadmin-redis-data:
