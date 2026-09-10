@@ -39,7 +39,7 @@ services:
       - --collation-server=utf8mb4_unicode_ci
       - --sql-mode=NO_ENGINE_SUBSTITUTION
     volumes:
-      - ./data/mysql:/var/lib/mysql
+      - fastadmin-rustdesk-debug-mysql-data:/var/lib/mysql
       - ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -67,3 +67,7 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+
+
+volumes:
+  fastadmin-rustdesk-debug-mysql-data

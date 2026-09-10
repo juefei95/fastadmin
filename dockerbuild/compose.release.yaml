@@ -49,7 +49,7 @@ services:
       MYSQL_PASSWORD: fastadmin
       TZ: Asia/Shanghai
     volumes:
-      - fastadmin-release-mysql-data:/var/lib/mysql
+      - fastadmin-rustdesk-release-mysql-data:/var/lib/mysql
       - ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
@@ -58,6 +58,6 @@ services:
       retries: 20
 
 volumes:
-  fastadmin-release-mysql-data:
+  fastadmin-rustdesk-release-mysql-data:
   fastadmin-release-runtime:
   fastadmin-release-uploads:
