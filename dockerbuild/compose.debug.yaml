@@ -38,8 +38,6 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --sql-mode=NO_ENGINE_SUBSTITUTION
-    ports:
-      - "3307:3306"
     volumes:
       - ./data/mysql:/var/lib/mysql
       - ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
