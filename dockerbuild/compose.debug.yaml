@@ -70,4 +70,4 @@ services:
 
 
 volumes:
-  fastadmin-rustdesk-debug-mysql-data
+  fastadmin-rustdesk-debug-mysql-data:
