@@ -24,7 +24,7 @@ services:
       mysql:
         condition: service_healthy
     volumes:
-      - ../:/app
+      - ../../:/app
       - fastadmin-rustdesk-release-uploads:/app/public/uploads
       - fastadmin-rustdesk-release-runtime:/app/runtime
     command: >
@@ -50,7 +50,7 @@ services:
       TZ: Asia/Shanghai
     volumes:
       - fastadmin-rustdesk-release-mysql-data:/var/lib/mysql
-      - ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
+      - ../../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
       interval: 5s

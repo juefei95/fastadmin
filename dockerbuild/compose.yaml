@@ -10,15 +10,20 @@ services:
       - "8000:8000"
     volumes:
       - ../:/app
+      - ./xdebug.ini:/usr/local/etc/php/conf.d/99-xdebug.ini
     environment:
       PHP_DATE_TIMEZONE: Asia/Shanghai
       PHP_DISPLAY_ERRORS: "1"
       PHP_MEMORY_LIMIT: 512M
+
       XDEBUG_MODE: debug,develop
       XDEBUG_CLIENT_HOST: host.docker.internal
       XDEBUG_CLIENT_PORT: "9003"
+      XDEBUG_CONFIG: "start_with_request=yes"
+
       APP_DEBUG: "true"
       APP_TRACE: "true"
+
       DATABASE_TYPE: mysql
       DATABASE_HOSTNAME: mysql
       DATABASE_DATABASE: rustdeskdata
