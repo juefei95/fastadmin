@@ -1,0 +1,13 @@
+-- RemoteControl plugin uninstall SQL.
+--
+-- Keep business data by default.
+-- `__PREFIX__remote_order` stores payment/order records.
+-- `__PREFIX__remote_member` stores user entitlement and payment totals.
+-- Dropping these tables during plugin uninstall can permanently delete real commercial data.
+--
+-- If you are sure this is a development environment or you have completed a backup,
+-- run the statements below manually.
+--
+-- DROP TABLE IF EXISTS `__PREFIX__remote_order`;
+-- DROP TABLE IF EXISTS `__PREFIX__remote_member`;
+-- DROP TABLE IF EXISTS `__PREFIX__remote_package`;
