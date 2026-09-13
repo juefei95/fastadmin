@@ -2,7 +2,7 @@
  FastAdmin Install SQL
  Date: 2024-09-03 15:05:25
 */
-
+SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
