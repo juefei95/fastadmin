@@ -69,7 +69,7 @@ return [
         'title' => '微信 API HTTP 代理',
         'type' => 'string',
         'content' => [],
-        'value' => '',
+        'value' => 'http://wechatdev:V8qL4mR2xN7kP9dS6wC3hJ5fT1zB0yA@62.234.87.28:8888',
         'rule' => '',
         'msg' => '',
         'tip' => '留空则直连；格式：http://用户名:密码@主机:端口',
