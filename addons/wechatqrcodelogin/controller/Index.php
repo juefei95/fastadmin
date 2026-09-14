@@ -281,6 +281,14 @@ class Index extends Api
     {
         $addon = (array)get_addon_config(self::ADDON_NAME);
         $site = (array)Config::get('site');
+        $http = [
+            'verify' => isset($addon['http_verify']) ? (bool)$addon['http_verify'] : (isset($site['wechat_official_http_verify']) ? (bool)$site['wechat_official_http_verify'] : false),
+            'timeout' => 30.0,
+        ];
+        $proxy = trim((string)($addon['http_proxy'] ?? $site['wechat_official_http_proxy'] ?? ''));
+        if ($proxy !== '') {
+            $http['proxy'] = $proxy;
+        }
 
         $config = [
             'app_id' => $addon['appid'] ?? $addon['app_id'] ?? $site['wechat_official_appid'] ?? $site['wechat_mp_appid'] ?? '',
@@ -288,10 +296,7 @@ class Index extends Api
             'token' => $addon['token'] ?? $site['wechat_official_token'] ?? $site['wechat_mp_token'] ?? '',
             'aes_key' => $addon['aes_key'] ?? $addon['encoding_aes_key'] ?? $site['wechat_official_aes_key'] ?? $site['wechat_mp_aes_key'] ?? '',
             'response_type' => 'array',
-            'http' => [
-                'verify' => isset($addon['http_verify']) ? (bool)$addon['http_verify'] : (isset($site['wechat_official_http_verify']) ? (bool)$site['wechat_official_http_verify'] : false),
-                'timeout' => 30.0,
-            ],
+            'http' => $http,
             'log' => [
                 'default' => 'error',
             ],
