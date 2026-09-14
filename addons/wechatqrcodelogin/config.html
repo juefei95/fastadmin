@@ -1,0 +1,99 @@
+<form id="config-form" class="edit-form form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="panel panel-default panel-intro">
+        <div class="panel-heading">
+            <h3 class="panel-title">微信公众号扫码登录配置</h3>
+        </div>
+        <div class="panel-body no-padding">
+            <table class="table table-striped table-config mb-0">
+                <tbody>
+                {foreach name="$addon.config" id="item"}
+                <tr>
+                    <td width="20%">{$item.title|htmlentities}</td>
+                    <td>
+                        <div class="row">
+                            <div class="col-sm-8 col-xs-12">
+                                {switch $item.type}
+                                {case string}
+                                <input {$item.extend} type="text" name="row[{$item.name|htmlentities}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" />
+                                {/case}
+                                {case password}
+                                <input {$item.extend} type="password" name="row[{$item.name|htmlentities}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" />
+                                {/case}
+                                {case radio}
+                                {foreach name="item.content" item="option"}
+                                <label class="radio-inline" for="row[{$item.name|htmlentities}]-{$key|htmlentities}">
+                                    <input id="row[{$item.name|htmlentities}]-{$key|htmlentities}" name="row[{$item.name|htmlentities}]" type="radio" value="{$key|htmlentities}" {in name="key" value="$item.value"}checked{/in} /> {$option|htmlentities}
+                                </label>
+                                {/foreach}
+                                {/case}
+                                {/switch}
+                                <span class="help-block">{$item.tip|htmlentities}</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {/foreach}
+                </tbody>
+            </table>
+            <div class="form-group" style="margin:20px 0 0;">
+                <label class="control-label col-xs-12 col-sm-2">接口测试</label>
+                <div class="col-xs-12 col-sm-8">
+                    <button id="btn-test-wechat-api" type="button" class="btn btn-info">
+                        <i class="fa fa-qrcode"></i> 测试接口并生成二维码
+                    </button>
+                    <span class="help-block">请先保存配置。测试会向微信请求一张 60 秒有效的临时二维码。</span>
+                </div>
+            </div>
+            <div class="form-group layer-footer">
+                <label class="control-label col-xs-12 col-sm-2"></label>
+                <div class="col-xs-12 col-sm-8">
+                    <button type="submit" class="btn btn-primary btn-embossed disabled">{:__('OK')}</button>
+                    <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    require.callback = function () {
+        define('backend/addon', ['backend', 'form'], function (Backend, Form) {
+            var Controller = {
+                config: function () {
+                    Form.api.bindevent($('form[role=form]'));
+
+                    $('#btn-test-wechat-api').on('click', function () {
+                        var $button = $(this);
+                        $button.prop('disabled', true);
+                        Fast.api.ajax({
+                            url: "{:addon_url('wechatqrcodelogin/index/loginqrcode')}",
+                            type: 'POST',
+                            data: {expire_seconds: 60},
+                            complete: function () {
+                                $button.prop('disabled', false);
+                            }
+                        }, function (data) {
+                            var $content = $('<div/>', {class: 'text-center', css: {padding: '20px'}});
+                            $('<img/>', {
+                                src: data.qr_url,
+                                alt: '微信公众号测试二维码',
+                                css: {display: 'block', width: '220px', height: '220px', margin: '0 auto 12px'}
+                            }).appendTo($content);
+                            $('<p/>', {text: '接口连接成功，二维码有效期 ' + data.expires_in + ' 秒。'}).appendTo($content);
+                            Layer.open({
+                                type: 1,
+                                title: '微信接口测试成功',
+                                area: ['320px', '360px'],
+                                content: $content
+                            });
+                            return false;
+                        }, function (data, ret) {
+                            Toastr.error(ret.msg || '接口测试失败');
+                            return false;
+                        });
+                    });
+                }
+            };
+            return Controller;
+        });
+    };
+</script>
