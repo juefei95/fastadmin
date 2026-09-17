@@ -9,6 +9,7 @@ use app\common\library\Sms;
 use app\common\model\User;
 use fast\Random;
 use think\Config;
+use think\Db;
 use think\Exception;
 use think\Hook;
 use think\Validate;
@@ -27,7 +28,7 @@ class Index extends Api
         }
 
         $action = strtolower($this->request->action());
-        if (in_array($action, ['login', 'mobilelogin', 'sms'], true) && !$this->request->isPost()) {
+        if (in_array($action, ['login', 'mobilelogin', 'sms', 'claimtrial'], true) && !$this->request->isPost()) {
             $this->error(__('Invalid parameters'));
         }
         if ($action === 'status' && !$this->request->isGet()) {
@@ -56,22 +57,13 @@ class Index extends Api
             $service = new RemoteMemberService();
             $userId = $this->auth->id;
             $member = $service->getMember($userId);
-            if (!$member || (int)$member['trial_given'] === 0) {
-                $member = $service->grantTrial($userId);
-            }
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }
 
         $this->success(__('Logged in successful'), [
             'userinfo' => $this->auth->getUserinfo(),
-            'member'   => [
-                'can_control'       => $member ? $service->canControl($userId) : false,
-                'trial_given'       => $member ? (int)$member['trial_given'] : 0,
-                'trial_started_at'  => $member ? (int)$member['trial_started_at'] : null,
-                'expire_time'       => $member && $member['expire_time'] ? date('Y-m-d H:i:s', (int)$member['expire_time']) : null,
-                'remaining_seconds' => $member && $member['expire_time'] ? max(0, (int)$member['expire_time'] - time()) : 0,
-            ],
+            'member'   => $this->getMemberPayload($member, $service, $userId),
         ]);
     }
 
@@ -137,6 +129,22 @@ class Index extends Api
             $service = new RemoteMemberService();
             $userId = $this->auth->id;
             $member = $service->getMember($userId);
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+
+        $this->success(__('Logged in successful'), [
+            'userinfo' => $this->auth->getUserinfo(),
+            'member'   => $this->getMemberPayload($member, $service, $userId),
+        ]);
+    }
+
+    public function claimtrial()
+    {
+        try {
+            $service = new RemoteMemberService();
+            $userId = $this->auth->id;
+            $member = $service->getMember($userId);
             if (!$member || (int)$member['trial_given'] === 0) {
                 $member = $service->grantTrial($userId);
             }
@@ -144,16 +152,7 @@ class Index extends Api
             $this->error($e->getMessage());
         }
 
-        $this->success(__('Logged in successful'), [
-            'userinfo' => $this->auth->getUserinfo(),
-            'member'   => [
-                'can_control'       => $member ? $service->canControl($userId) : false,
-                'trial_given'       => $member ? (int)$member['trial_given'] : 0,
-                'trial_started_at'  => $member ? (int)$member['trial_started_at'] : null,
-                'expire_time'       => $member && $member['expire_time'] ? date('Y-m-d H:i:s', (int)$member['expire_time']) : null,
-                'remaining_seconds' => $member && $member['expire_time'] ? max(0, (int)$member['expire_time'] - time()) : 0,
-            ],
-        ]);
+        $this->success('', $this->getMemberPayload($member, $service, $userId));
     }
 
     public function status()
@@ -162,19 +161,35 @@ class Index extends Api
             $service = new RemoteMemberService();
             $userId = $this->auth->id;
             $member = $service->getMember($userId);
-            $canControl = $service->canControl($userId);
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }
 
+        $this->success('', $this->getMemberPayload($member, $service, $userId));
+    }
+
+    protected function getMemberPayload($member, RemoteMemberService $service, $userId)
+    {
         $expireTime = $member && $member['expire_time'] ? (int)$member['expire_time'] : 0;
-        $this->success('', [
-            'can_control'       => $canControl,
+        $latestOrder = Db::name('remote_order')
+            ->where('user_id', (int)$userId)
+            ->where('status', 1)
+            ->order('paid_at desc, id desc')
+            ->find();
+        $packageName = trim((string)($latestOrder['package_name'] ?? ''));
+        if ($packageName !== '' && strpos($packageName, '会员') === false) {
+            $packageName .= '会员';
+        }
+
+        return [
+            'can_control'       => $member ? $service->canControl($userId) : false,
             'trial_given'       => $member ? (int)$member['trial_given'] : 0,
+            'trial_started_at'  => $member ? (int)$member['trial_started_at'] : null,
             'control_enabled'   => $member ? (int)$member['control_enabled'] : 0,
+            'package_name'      => $packageName,
             'expire_time'       => $expireTime ? date('Y-m-d H:i:s', $expireTime) : null,
             'remaining_seconds' => $expireTime ? max(0, $expireTime - time()) : 0,
-        ]);
+        ];
     }
 
     public function packages()

@@ -25,7 +25,7 @@ class RemoteMemberService
                 return $this->getMember($userId);
             }
 
-            $expireTime = $now + $days * 86400;
+            $expireTime = max($now + $days * 86400, (int)($member['expire_time'] ?? 0));
             Db::name('remote_member')->where('user_id', $userId)->update([
                 'trial_given'       => 1,
                 'trial_started_at'  => $now,
