@@ -38,13 +38,13 @@ class Remote extends remote\Index
         }
 
         $pathinfo = strtolower(trim($this->request->pathinfo(), '/'));
-        if ($pathinfo !== 'api/remote/payment/notify' || !$this->request->isPost()) {
+        if (!preg_match('#^api/remote/payment/notify/(wechat|alipay)$#', $pathinfo, $matches) || !$this->request->isPost()) {
             $this->error(__('Invalid parameters'));
         }
 
         try {
             $service = new RemotePaymentService();
-            return $service->handleNotify($this->request->param('paytype', $this->request->param('type', '')));
+            return $service->handleNotify($matches[1]);
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }

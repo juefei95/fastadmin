@@ -70,6 +70,12 @@ class RemotePaymentService
         }
 
         $data = \addons\epay\library\Service::isVersionV3() ? $pay->callback() : $pay->verify();
+        if (is_object($data) && method_exists($data, 'all')) {
+            $data = $data->all();
+        }
+        if (!is_array($data)) {
+            throw new Exception('Payment notify data is invalid');
+        }
         if (\addons\epay\library\Service::isVersionV3() && $payType === 'wechat') {
             $data = $data['resource']['ciphertext'];
             $data['total_fee'] = $data['amount']['total'];
@@ -143,7 +149,7 @@ class RemotePaymentService
             $url = request()->domain() . '/api/remote/payment/notify';
         }
 
-        return $url . (strpos($url, '?') === false ? '?' : '&') . http_build_query(['paytype' => $payType]);
+        return rtrim($url, '/') . '/' . $payType;
     }
 
     protected function getReturnUrl(array $order)
