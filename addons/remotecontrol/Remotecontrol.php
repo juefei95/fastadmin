@@ -17,6 +17,9 @@ class Remotecontrol extends Addons
      */
     public function install()
     {
+        if (!$this->registerConsoleCommand()) {
+            return false;
+        }
         Menu::create($this->getMenu());
         return true;
     }
@@ -27,6 +30,7 @@ class Remotecontrol extends Addons
      */
     public function uninstall()
     {
+        $this->unregisterConsoleCommand();
         Menu::delete('remotecontrol');
         return true;
     }
@@ -49,6 +53,40 @@ class Remotecontrol extends Addons
     {
         Menu::disable('remotecontrol');
         return true;
+    }
+
+    protected function registerConsoleCommand()
+    {
+        $commandFile = APP_PATH . 'command.php';
+        $command = "    'app\\admin\\command\\RemoteOrder',";
+        $content = @file_get_contents($commandFile);
+        if ($content === false || strpos($content, $command) !== false) {
+            return $content !== false;
+        }
+
+        $position = strrpos($content, '];');
+        if ($position === false) {
+            return false;
+        }
+        $lineEnding = strpos($content, "\r\n") === false ? "\n" : "\r\n";
+        $updated = substr($content, 0, $position) . $command . $lineEnding . substr($content, $position);
+
+        return file_put_contents($commandFile, $updated) !== false;
+    }
+
+    protected function unregisterConsoleCommand()
+    {
+        $commandFile = APP_PATH . 'command.php';
+        $command = "    'app\\admin\\command\\RemoteOrder',";
+        $content = @file_get_contents($commandFile);
+        if ($content === false) {
+            return;
+        }
+
+        $updated = str_replace([$command . "\r\n", $command . "\n"], '', $content);
+        if ($updated !== $content) {
+            file_put_contents($commandFile, $updated);
+        }
     }
 
     protected function getMenu()

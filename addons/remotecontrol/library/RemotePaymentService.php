@@ -6,6 +6,7 @@ use addons\epay\library\Collection;
 use addons\epay\library\RedirectResponse;
 use addons\epay\library\Response;
 use think\Exception;
+use think\Db;
 
 class RemotePaymentService
 {
@@ -57,6 +58,47 @@ class RemotePaymentService
             'return_url' => $params['returnurl'],
             'result'     => $this->normalizePaymentResult($result),
         ];
+    }
+
+    public function closePaymentOrder(array $order)
+    {
+        $payType = $this->normalizePayType($order['pay_type'] ?? '');
+        if ((int)$order['status'] !== 0) {
+            throw new Exception('Only pending orders can be closed');
+        }
+        $this->ensurePaymentAvailable($payType);
+
+        $config = \addons\epay\library\Service::getConfig($payType);
+        $pay = $payType === 'wechat'
+            ? \Yansongda\Pay\Pay::wechat($config)
+            : \Yansongda\Pay\Pay::alipay($config);
+        $pay->close(['out_trade_no' => $order['order_no']]);
+    }
+
+    public function closeExpiredPendingOrders()
+    {
+        $timeoutMinutes = max(1, (int)$this->getConfig('payment_order_timeout_minutes', 15));
+        $orders = Db::name('remote_order')
+            ->where('status', 0)
+            ->where('createtime', '<=', time() - $timeoutMinutes * 60)
+            ->order('id asc')
+            ->limit(100)
+            ->select();
+        $result = ['closed' => 0, 'failed' => []];
+
+        foreach ($orders as $order) {
+            try {
+                $this->closePaymentOrder($order);
+                $closedOrder = $this->orderService->closePendingOrder($order['order_no']);
+                if ((int)$closedOrder['status'] === 2) {
+                    $result['closed']++;
+                }
+            } catch (Exception $e) {
+                $result['failed'][] = $order['order_no'];
+            }
+        }
+
+        return $result;
     }
 
     public function handleNotify($payType = null)

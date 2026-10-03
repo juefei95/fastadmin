@@ -27,6 +27,10 @@ class Remote extends remote\Index
             $this->orderStatus();
             return;
         }
+        if ($pathinfo === 'api/remote/order/cancel') {
+            $this->cancelOrder();
+            return;
+        }
 
         $this->error(__('Invalid parameters'));
     }
@@ -120,6 +124,34 @@ class Remote extends remote\Index
         try {
             $service = new RemoteOrderService();
             $order = $service->getUserOrder($this->auth->id, $orderNo);
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+
+        $this->success('', [
+            'order' => [
+                'order_no'    => $order['order_no'],
+                'status'      => (int)$order['status'],
+                'status_text' => $service->getStatusText($order['status']),
+            ],
+        ]);
+    }
+
+    protected function cancelOrder()
+    {
+        if (!$this->request->isPost()) {
+            $this->error(__('Invalid parameters'));
+        }
+
+        $orderNo = (string)$this->request->post('order_no', '');
+        try {
+            $service = new RemoteOrderService();
+            $order = $service->getUserOrder($this->auth->id, $orderNo);
+            if ((int)$order['status'] === 0) {
+                $paymentService = new RemotePaymentService($service);
+                $paymentService->closePaymentOrder($order);
+                $order = $service->closePendingOrder($order['order_no']);
+            }
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }
