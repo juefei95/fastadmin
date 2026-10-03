@@ -128,11 +128,20 @@ class Remote extends remote\Index
             $this->error($e->getMessage());
         }
 
+        $paymentStatus = '';
+        if ((int)$order['status'] === 0) {
+            try {
+                $paymentStatus = (new RemotePaymentService($service))->getPaymentStatus($order);
+            } catch (Exception $e) {
+            }
+        }
+
         $this->success('', [
             'order' => [
                 'order_no'    => $order['order_no'],
                 'status'      => (int)$order['status'],
                 'status_text' => $service->getStatusText($order['status']),
+                'payment_status' => $paymentStatus,
             ],
         ]);
     }

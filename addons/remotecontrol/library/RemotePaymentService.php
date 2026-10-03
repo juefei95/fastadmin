@@ -75,6 +75,26 @@ class RemotePaymentService
         $pay->close(['out_trade_no' => $order['order_no']]);
     }
 
+    public function getPaymentStatus(array $order)
+    {
+        $payType = $this->normalizePayType($order['pay_type'] ?? '');
+        $this->ensurePaymentAvailable($payType);
+
+        $config = \addons\epay\library\Service::getConfig($payType);
+        $pay = $payType === 'wechat'
+            ? \Yansongda\Pay\Pay::wechat($config)
+            : \Yansongda\Pay\Pay::alipay($config);
+        if ($payType === 'wechat') {
+            $result = \addons\epay\library\Service::isVersionV3()
+                ? $pay->find(['out_trade_no' => $order['order_no']])
+                : $pay->find($order['order_no'], $this->getPayMethod());
+            return strtoupper((string)($result['trade_state'] ?? 'NOTPAY'));
+        }
+
+        $result = $pay->find(['out_trade_no' => $order['order_no']]);
+        return strtoupper((string)($result['trade_status'] ?? 'NOTPAY'));
+    }
+
     public function closeExpiredPendingOrders()
     {
         $timeoutMinutes = max(1, (int)$this->getConfig('payment_order_timeout_minutes', 15));
