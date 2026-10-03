@@ -132,7 +132,9 @@ class Remote extends remote\Index
         if ((int)$order['status'] === 0) {
             try {
                 $paymentStatus = (new RemotePaymentService($service))->getPaymentStatus($order);
+                \think\Log::info('[REMOTE-PAYMENT-STATUS] order=' . $order['order_no'] . ' local=0 provider=' . $paymentStatus);
             } catch (Exception $e) {
+                \think\Log::error('[REMOTE-PAYMENT-STATUS] order=' . $order['order_no'] . ' query_failed=' . $e->getMessage());
             }
         }
 
