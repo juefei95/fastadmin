@@ -4,6 +4,7 @@ namespace addons\remotecontrol;
 
 use app\common\library\Menu;
 use think\Addons;
+use think\Db;
 
 /**
  * 插件
@@ -52,6 +53,17 @@ class Remotecontrol extends Addons
     public function disable()
     {
         Menu::disable('remotecontrol');
+        return true;
+    }
+
+    public function upgrade()
+    {
+        $table = config('database.prefix') . 'remote_package';
+        $columns = Db::query("SHOW COLUMNS FROM `{$table}` LIKE 'original_price'");
+        if (!$columns) {
+            Db::execute("ALTER TABLE `{$table}` ADD `original_price` decimal(10,2) unsigned NOT NULL DEFAULT '0.00' COMMENT '原价' AFTER `price`");
+            Db::execute("UPDATE `{$table}` SET `original_price` = `price` * 2");
+        }
         return true;
     }
 

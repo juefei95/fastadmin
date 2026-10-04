@@ -208,6 +208,7 @@ class Index extends Api
                 'name'        => $package['name'],
                 'days'        => (int)$package['days'],
                 'price'       => (string)$package['price'],
+                'original_price' => (string)$package['original_price'],
                 'recommended' => (int)$package['recommended'],
                 'description' => $package['description'],
             ];
