@@ -1,5 +1,11 @@
 <?php
 
+use think\Route;
+
+Route::post('api/heartbeat', 'api/remote/heartbeat');
+Route::post('api/sysinfo', 'api/remote/sysinfo');
+Route::post('api/sysinfo_ver', 'api/remote/sysinfover');
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------

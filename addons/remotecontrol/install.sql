@@ -52,3 +52,21 @@ CREATE TABLE IF NOT EXISTS `__PREFIX__remote_order` (
   KEY `status` (`status`),
   KEY `paid_at` (`paid_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='远控订单表';
+
+CREATE TABLE IF NOT EXISTS `__PREFIX__remote_device` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `device_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'RustDesk设备ID',
+  `device_uuid` varchar(128) NOT NULL DEFAULT '' COMMENT '设备UUID',
+  `client_version` varchar(64) NOT NULL DEFAULT '' COMMENT '客户端版本',
+  `hostname` varchar(255) NOT NULL DEFAULT '' COMMENT '主机名',
+  `username` varchar(255) NOT NULL DEFAULT '' COMMENT '用户名',
+  `connection_count` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '活动连接数',
+  `last_seen_at` bigint(16) DEFAULT NULL COMMENT '最后心跳时间',
+  `sysinfo` mediumtext COMMENT '客户端系统信息',
+  `sysinfo_updated_at` bigint(16) DEFAULT NULL COMMENT '系统信息更新时间',
+  `created_at` bigint(16) DEFAULT NULL COMMENT '创建时间',
+  `updated_at` bigint(16) DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `device_id` (`device_id`),
+  KEY `last_seen_at` (`last_seen_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='远控客户端设备心跳表';

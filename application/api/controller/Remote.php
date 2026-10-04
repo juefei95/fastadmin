@@ -4,12 +4,13 @@ namespace app\api\controller;
 
 use addons\remotecontrol\library\RemoteOrderService;
 use addons\remotecontrol\library\RemotePaymentService;
+use addons\remotecontrol\library\RemoteHeartbeatService;
 use think\Config;
 use think\Exception;
 
 class Remote extends remote\Index
 {
-    protected $noNeedLogin = ['login', 'packages', 'payment', 'client'];
+    protected $noNeedLogin = ['login', 'packages', 'payment', 'client', 'heartbeat', 'sysinfo', 'sysinfover'];
     protected $noNeedRight = '*';
 
     public function order()
@@ -65,10 +66,52 @@ class Remote extends remote\Index
         $this->success('', [
             'id_server'      => (string)($config['id_server'] ?? ''),
             'relay_server'   => (string)($config['relay_server'] ?? ''),
+            'api_server'     => (string)($config['api_server'] ?? ''),
             'public_key'     => (string)($config['public_key'] ?? ''),
             'latest_version' => (string)($config['latest_version'] ?? ''),
             'min_version'    => (string)($config['min_version'] ?? ''),
         ]);
+    }
+
+    public function heartbeat()
+    {
+        try {
+            (new RemoteHeartbeatService())->recordHeartbeat($this->getRemotePayload());
+        } catch (Exception $e) {
+            \think\Log::error('[REMOTE-HEARTBEAT] ' . $e->getMessage());
+            return response('', 500);
+        }
+
+        return json(new \stdClass());
+    }
+
+    public function sysinfo()
+    {
+        try {
+            (new RemoteHeartbeatService())->recordSysinfo($this->getRemotePayload());
+        } catch (Exception $e) {
+            \think\Log::error('[REMOTE-SYSINFO] ' . $e->getMessage());
+            return response('', 500);
+        }
+
+        return response('SYSINFO_UPDATED');
+    }
+
+    public function sysinfover()
+    {
+        $id = (string)$this->request->post('id', '');
+        return response((new RemoteHeartbeatService())->getSysinfoVersion($id));
+    }
+
+    protected function getRemotePayload()
+    {
+        $payload = $this->request->post();
+        if ($payload) {
+            return $payload;
+        }
+
+        $payload = json_decode($this->request->getInput(), true);
+        return is_array($payload) ? $payload : [];
     }
 
     protected function createOrder()
