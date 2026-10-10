@@ -19,7 +19,8 @@ class Remotecontrol extends Addons
     public function install()
     {
         $this->ensureDeviceTable();
-        if (!$this->installApiFiles() || !$this->registerHeartbeatRoutes()) {
+        $this->ensureRdpTunnelTable();
+        if (!$this->installApiFiles() || !$this->installAssets() || !$this->registerHeartbeatRoutes()) {
             return false;
         }
         if (!$this->registerConsoleCommand()) {
@@ -47,6 +48,7 @@ class Remotecontrol extends Addons
     public function enable()
     {
         $this->ensureDeviceTable();
+        $this->ensureRdpTunnelTable();
         if (!Menu::upgrade('remotecontrol', $this->getMenu())) {
             throw new \think\Exception('更新远控菜单失败');
         }
@@ -66,7 +68,7 @@ class Remotecontrol extends Addons
 
     public function upgrade()
     {
-        if (!$this->registerHeartbeatRoutes()) {
+        if (!$this->installApiFiles() || !$this->installAssets() || !$this->registerHeartbeatRoutes() || !$this->registerConsoleCommand()) {
             return false;
         }
         $table = config('database.prefix') . 'remote_package';
@@ -76,6 +78,7 @@ class Remotecontrol extends Addons
             Db::execute("UPDATE `{$table}` SET `original_price` = `price` * 2");
         }
         $this->ensureDeviceTable();
+        $this->ensureRdpTunnelTable();
         if (!Menu::upgrade('remotecontrol', $this->getMenu())) {
             throw new \think\Exception('更新远控设备状态菜单失败');
         }
@@ -104,6 +107,36 @@ class Remotecontrol extends Addons
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='远控客户端设备心跳表'");
     }
 
+    protected function ensureRdpTunnelTable()
+    {
+        $tunnelTable = config('database.prefix') . 'remote_rdp_tunnel';
+        Db::execute("CREATE TABLE IF NOT EXISTS `{$tunnelTable}` (
+            `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+            `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+            `device_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'RustDesk设备ID',
+            `proxy_name` varchar(128) NOT NULL DEFAULT '' COMMENT 'FRP代理名称',
+            `public_port` int(10) unsigned DEFAULT NULL COMMENT 'FRP公网端口',
+            `status` varchar(20) NOT NULL DEFAULT 'inactive' COMMENT '状态:inactive=未启用,allocated=已分配,active=运行中,stopping=等待客户端停止',
+            `last_error` varchar(255) NOT NULL DEFAULT '' COMMENT '最近错误',
+            `created_at` bigint(16) DEFAULT NULL COMMENT '创建时间',
+            `updated_at` bigint(16) DEFAULT NULL COMMENT '更新时间',
+            `activated_at` bigint(16) DEFAULT NULL COMMENT '启用时间',
+            `deactivated_at` bigint(16) DEFAULT NULL COMMENT '停用时间',
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `user_device` (`user_id`,`device_id`),
+            KEY `proxy_name` (`proxy_name`),
+            UNIQUE KEY `public_port` (`public_port`),
+            KEY `status` (`status`),
+            KEY `user_id` (`user_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Windows远程桌面FRP映射表'");
+        $columns = Db::query("SHOW COLUMNS FROM `{$tunnelTable}` LIKE 'proxy_name'");
+        if (!$columns) {
+            Db::execute("ALTER TABLE `{$tunnelTable}` ADD `proxy_name` varchar(128) NOT NULL DEFAULT '' COMMENT 'FRP代理名称' AFTER `device_id`, ADD KEY `proxy_name` (`proxy_name`)");
+        }
+        Db::name('remote_rdp_tunnel')->where('status', 'pending')->update(['status' => 'allocated']);
+        Db::name('remote_rdp_tunnel')->where('status', 'disable_failed')->update(['status' => 'stopping']);
+    }
+
     protected function installApiFiles()
     {
         $files = [
@@ -112,10 +145,26 @@ class Remotecontrol extends Addons
             'api' . DS . 'controller' . DS . 'Sysinfo.php',
             'api' . DS . 'controller' . DS . 'SysinfoVer.php',
             'api' . DS . 'controller' . DS . 'remote' . DS . 'Index.php',
+            'admin' . DS . 'command' . DS . 'RemoteOrder.php',
+            'admin' . DS . 'command' . DS . 'RemoteRdpTunnel.php',
+            'admin' . DS . 'controller' . DS . 'remotecontrol' . DS . 'RdpTunnel.php',
+            'admin' . DS . 'model' . DS . 'remotecontrol' . DS . 'RdpTunnel.php',
+            'admin' . DS . 'view' . DS . 'remotecontrol' . DS . 'rdp_tunnel' . DS . 'index.html',
+            'admin' . DS . 'controller' . DS . 'remotecontrol' . DS . 'RdpPortPool.php',
+            'admin' . DS . 'view' . DS . 'remotecontrol' . DS . 'rdp_port_pool' . DS . 'index.html',
+        ];
+        $overwrite = [
+            'api' . DS . 'controller' . DS . 'Remote.php',
+            'admin' . DS . 'command' . DS . 'RemoteRdpTunnel.php',
+            'admin' . DS . 'controller' . DS . 'remotecontrol' . DS . 'RdpTunnel.php',
+            'admin' . DS . 'model' . DS . 'remotecontrol' . DS . 'RdpTunnel.php',
+            'admin' . DS . 'view' . DS . 'remotecontrol' . DS . 'rdp_tunnel' . DS . 'index.html',
+            'admin' . DS . 'controller' . DS . 'remotecontrol' . DS . 'RdpPortPool.php',
+            'admin' . DS . 'view' . DS . 'remotecontrol' . DS . 'rdp_port_pool' . DS . 'index.html',
         ];
         foreach ($files as $file) {
             $target = APP_PATH . $file;
-            if (is_file($target)) {
+            if (is_file($target) && !in_array($file, $overwrite, true)) {
                 continue;
             }
             $directory = dirname($target);
@@ -123,6 +172,22 @@ class Remotecontrol extends Addons
                 return false;
             }
             if (!copy(__DIR__ . DS . 'application' . DS . $file, $target)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected function installAssets()
+    {
+        foreach (['rdp_tunnel.js', 'rdp_port_pool.js'] as $file) {
+            $source = __DIR__ . DS . 'public' . DS . 'assets' . DS . 'js' . DS . 'backend' . DS . 'remotecontrol' . DS . $file;
+            $target = ROOT_PATH . 'public' . DS . 'assets' . DS . 'js' . DS . 'backend' . DS . 'remotecontrol' . DS . $file;
+            $directory = dirname($target);
+            if (!is_dir($directory) && !mkdir($directory, 0755, true)) {
+                return false;
+            }
+            if (!is_file($source) || !copy($source, $target)) {
                 return false;
             }
         }
@@ -152,10 +217,9 @@ class Remotecontrol extends Addons
     protected function registerConsoleCommand()
     {
         $commandFile = APP_PATH . 'command.php';
-        $command = "    'app\\admin\\command\\RemoteOrder',";
         $content = @file_get_contents($commandFile);
-        if ($content === false || strpos($content, $command) !== false) {
-            return $content !== false;
+        if ($content === false) {
+            return false;
         }
 
         $position = strrpos($content, '];');
@@ -163,7 +227,20 @@ class Remotecontrol extends Addons
             return false;
         }
         $lineEnding = strpos($content, "\r\n") === false ? "\n" : "\r\n";
-        $updated = substr($content, 0, $position) . $command . $lineEnding . substr($content, $position);
+        $commands = [
+            "    'app\\admin\\command\\RemoteOrder',",
+            "    'app\\admin\\command\\RemoteRdpTunnel',",
+        ];
+        $missing = [];
+        foreach ($commands as $command) {
+            if (strpos($content, $command) === false) {
+                $missing[] = $command;
+            }
+        }
+        if (!$missing) {
+            return true;
+        }
+        $updated = substr($content, 0, $position) . implode($lineEnding, $missing) . $lineEnding . substr($content, $position);
 
         return file_put_contents($commandFile, $updated) !== false;
     }
@@ -171,13 +248,19 @@ class Remotecontrol extends Addons
     protected function unregisterConsoleCommand()
     {
         $commandFile = APP_PATH . 'command.php';
-        $command = "    'app\\admin\\command\\RemoteOrder',";
         $content = @file_get_contents($commandFile);
         if ($content === false) {
             return;
         }
 
-        $updated = str_replace([$command . "\r\n", $command . "\n"], '', $content);
+        $commands = [
+            "    'app\\admin\\command\\RemoteOrder',",
+            "    'app\\admin\\command\\RemoteRdpTunnel',",
+        ];
+        $updated = str_replace([
+            $commands[0] . "\r\n", $commands[0] . "\n",
+            $commands[1] . "\r\n", $commands[1] . "\n",
+        ], '', $content);
         if ($updated !== $content) {
             file_put_contents($commandFile, $updated);
         }
@@ -230,6 +313,29 @@ class Remotecontrol extends Addons
                         'weigh'   => 15,
                         'sublist' => [
                             ['name' => 'remotecontrol/device/index', 'title' => '查看'],
+                        ],
+                    ],
+                    [
+                        'name'    => 'remotecontrol/rdp_tunnel',
+                        'title'   => '远程桌面映射',
+                        'icon'    => 'fa fa-exchange',
+                        'ismenu'  => 1,
+                        'weigh'   => 14,
+                        'sublist' => [
+                            ['name' => 'remotecontrol/rdp_tunnel/index', 'title' => '查看'],
+                            ['name' => 'remotecontrol/rdp_tunnel/close', 'title' => '停用映射'],
+                        ],
+                    ],
+                    [
+                        'name'    => 'remotecontrol/rdp_port_pool',
+                        'title'   => '远程桌面端口池',
+                        'icon'    => 'fa fa-list-ol',
+                        'ismenu'  => 1,
+                        'weigh'   => 13,
+                        'sublist' => [
+                            ['name' => 'remotecontrol/rdp_port_pool/index', 'title' => '查看'],
+                            ['name' => 'remotecontrol/rdp_port_pool/openaccess', 'title' => '开放公网访问'],
+                            ['name' => 'remotecontrol/rdp_port_pool/closeaccess', 'title' => '关闭公网访问'],
                         ],
                     ],
                     [

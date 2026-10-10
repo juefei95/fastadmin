@@ -5,6 +5,7 @@ namespace app\api\controller;
 use addons\remotecontrol\library\RemoteOrderService;
 use addons\remotecontrol\library\RemotePaymentService;
 use addons\remotecontrol\library\RemoteHeartbeatService;
+use addons\remotecontrol\library\RemoteRdpTunnelService;
 use think\Config;
 use think\Exception;
 
@@ -71,6 +72,34 @@ class Remote extends remote\Index
             'latest_version' => (string)($config['latest_version'] ?? ''),
             'min_version'    => (string)($config['min_version'] ?? ''),
         ]);
+    }
+
+    public function rdp()
+    {
+        $pathinfo = strtolower(trim($this->request->pathinfo(), '/'));
+        if (!preg_match('#^api/remote/rdp/(status|open|started|close)$#', $pathinfo, $matches)) {
+            $this->error(__('Invalid parameters'));
+        }
+        $action = $matches[1];
+        if (($action === 'status' && !$this->request->isGet()) || ($action !== 'status' && !$this->request->isPost())) {
+            $this->error(__('Invalid parameters'));
+        }
+        $deviceId = $action === 'status' ? (string)$this->request->get('device_id', '') : (string)$this->request->post('device_id', '');
+        try {
+            $service = new RemoteRdpTunnelService();
+            if ($action === 'status') {
+                $data = $service->getTunnel($this->auth->id, $deviceId);
+            } elseif ($action === 'open') {
+                $data = $service->activate($this->auth->id, $deviceId);
+            } elseif ($action === 'started') {
+                $data = $service->confirmStarted($this->auth->id, $deviceId);
+            } else {
+                $data = $service->deactivate($this->auth->id, $deviceId);
+            }
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('', $data);
     }
 
     public function heartbeat()

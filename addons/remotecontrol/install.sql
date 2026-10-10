@@ -70,3 +70,23 @@ CREATE TABLE IF NOT EXISTS `__PREFIX__remote_device` (
   UNIQUE KEY `device_id` (`device_id`),
   KEY `last_seen_at` (`last_seen_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='远控客户端设备心跳表';
+
+CREATE TABLE IF NOT EXISTS `__PREFIX__remote_rdp_tunnel` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `device_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'RustDesk设备ID',
+  `proxy_name` varchar(128) NOT NULL DEFAULT '' COMMENT 'FRP代理名称',
+  `public_port` int(10) unsigned DEFAULT NULL COMMENT 'FRP公网端口',
+  `status` varchar(20) NOT NULL DEFAULT 'inactive' COMMENT '状态:inactive=未启用,allocated=已分配,active=运行中,stopping=等待客户端停止',
+  `last_error` varchar(255) NOT NULL DEFAULT '' COMMENT '最近错误',
+  `created_at` bigint(16) DEFAULT NULL COMMENT '创建时间',
+  `updated_at` bigint(16) DEFAULT NULL COMMENT '更新时间',
+  `activated_at` bigint(16) DEFAULT NULL COMMENT '启用时间',
+  `deactivated_at` bigint(16) DEFAULT NULL COMMENT '停用时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_device` (`user_id`,`device_id`),
+  KEY `proxy_name` (`proxy_name`),
+  UNIQUE KEY `public_port` (`public_port`),
+  KEY `status` (`status`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Windows远程桌面FRP映射表';

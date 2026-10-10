@@ -110,6 +110,10 @@ class RemoteMemberService
             'updated_at'  => time(),
         ]);
 
+        if ($expireTime <= time()) {
+            (new RemoteRdpTunnelService($this))->markInvalidTunnelsForUser($userId);
+        }
+
         return $this->getMember($userId);
     }
 
@@ -130,6 +134,10 @@ class RemoteMemberService
             'control_enabled' => $enabled ? 1 : 0,
             'updated_at'      => time(),
         ]);
+
+        if (!$enabled) {
+            (new RemoteRdpTunnelService($this))->markInvalidTunnelsForUser($userId);
+        }
 
         return $this->getMember($userId);
     }

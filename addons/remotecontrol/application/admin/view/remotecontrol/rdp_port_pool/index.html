@@ -1,0 +1,46 @@
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+    <div class="panel-body">
+        <div class="alert alert-info">端口池状态由映射记录自动判断：已分配的端口不会重复分配，未分配端口自动参与分配。公网访问状态当前为“未知”，待接入端口控制接口后显示“开放”或“关闭”。</div>
+        <div id="toolbar" class="toolbar">
+            <a href="javascript:;" class="btn btn-primary btn-refresh"><i class="fa fa-refresh"></i> {:__('Refresh')}</a>
+            <a href="javascript:;" class="btn btn-success btn-access-open"><i class="fa fa-unlock"></i> 开放选中端口</a>
+            <a href="javascript:;" class="btn btn-danger btn-access-close"><i class="fa fa-lock"></i> 关闭选中端口</a>
+        </div>
+        <table id="table" class="table table-striped table-bordered table-hover table-nowrap" width="100%"></table>
+        <div class="panel panel-default" style="margin-top:15px;">
+            <div class="panel-heading"><strong>字段和值说明</strong></div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-condensed" style="margin-bottom:0;">
+                    <thead>
+                        <tr>
+                            <th style="width:150px;">项目</th>
+                            <th style="width:280px;">可能的值</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>端口</td><td>6011-6999</td><td>FRPS 对公网提供的 TCP 端口；已分配端口不会重复分配。</td></tr>
+                        <tr><td>端口池状态</td><td>已分配 / 未分配</td><td>“已分配”表示数据库中已有用户设备映射；“未分配”表示没有映射，会自动参与后续分配。</td></tr>
+                        <tr><td>代理状态</td><td>空闲</td><td>数据库没有映射，FRPS 中也没有检测到在线代理。</td></tr>
+                        <tr><td>代理状态</td><td>RustDesk在线</td><td>端口已分配，且 FRPS 中的在线代理名称与预期代理名一致。</td></tr>
+                        <tr><td>代理状态</td><td>已分配未上线</td><td>数据库已经分配端口，但 FRPS 中暂未检测到对应在线代理；可能是 frpc 未启动、掉线或正在启动。</td></tr>
+                        <tr><td>代理状态</td><td>已分配/未核验</td><td>端口已分配，但 FRPS Dashboard 当前不可用，无法核验代理是否在线。</td></tr>
+                        <tr><td>代理状态</td><td>未知占用</td><td>数据库没有分配记录，但 FRPS 中存在其他在线代理，该端口不能视为安全空闲。</td></tr>
+                        <tr><td>代理状态</td><td>映射冲突</td><td>数据库已分配端口，但 FRPS 实际代理名与预期代理名不一致。</td></tr>
+                        <tr><td>代理状态</td><td>监控不可用</td><td>FRPS Dashboard 未配置、认证失败或连接失败，且端口没有数据库映射。</td></tr>
+                        <tr><td>公网访问状态</td><td>开放 / 关闭 / 未知</td><td>“开放”表示公网允许连接；“关闭”表示端口控制服务已拦截；“未知”表示控制接口尚未接入或查询失败。</td></tr>
+                        <tr><td>用户 ID / 设备 ID</td><td>数字 / RustDesk设备标识</td><td>显示当前获得该端口的用户和设备；未分配时为空。</td></tr>
+                        <tr><td>后台状态</td><td>pending / allocated / active / stopping / inactive</td><td>依次表示等待分配确认、已分配、运行中、等待客户端停止、已停止。</td></tr>
+                        <tr><td>预期代理名</td><td>rustdesk-rdp-u...-d...</td><td>后端生成并要求客户端启动 frpc 时使用的代理名称。</td></tr>
+                        <tr><td>FRPS 实际代理名</td><td>FRPS返回的代理名称</td><td>从 FRPS Dashboard 实时读取，用于和预期代理名核对。</td></tr>
+                        <tr><td>FRPS 状态</td><td>online / offline / 空</td><td>FRPS 返回的原始代理运行状态；空表示未查询到代理。</td></tr>
+                        <tr><td>监控说明</td><td>空或错误信息</td><td>正常时为空；FRPS Dashboard 读取失败时显示具体原因。</td></tr>
+                        <tr><td>公网访问操作</td><td>开放 / 关闭</td><td>预留的端口控制操作；当前接口尚未接入，点击不会改变服务器端口。</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
