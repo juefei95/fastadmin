@@ -19,3 +19,4 @@ node_modules
 .user.ini
 
 /dockerbuild/data/*
+config.local.php

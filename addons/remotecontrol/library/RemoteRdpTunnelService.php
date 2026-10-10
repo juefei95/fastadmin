@@ -40,6 +40,14 @@ class RemoteRdpTunnelService
         }
 
         $tunnel = $this->reserveTunnel($userId, $deviceId);
+        try {
+            (new RemotePortManagerService($this->config))->setTcpPortEnabled((int)$tunnel['public_port'], true);
+        } catch (\Exception $e) {
+            Db::name('remote_rdp_tunnel')->where('id', $tunnel['id'])->update([
+                'last_error' => substr('开放公网访问失败：' . $e->getMessage(), 0, 255), 'updated_at' => time(),
+            ]);
+            throw new Exception('远程桌面端口开放失败：' . $e->getMessage());
+        }
         $now = time();
         Db::name('remote_rdp_tunnel')->where('id', $tunnel['id'])->update([
             'status' => 'allocated', 'last_error' => '', 'updated_at' => $now, 'activated_at' => $now,
@@ -54,6 +62,9 @@ class RemoteRdpTunnelService
         $tunnel = Db::name('remote_rdp_tunnel')->where('user_id', $userId)->where('device_id', $deviceId)->find();
         if (!$tunnel || empty($tunnel['public_port'])) {
             return $this->buildPayload($tunnel);
+        }
+        if ($this->markStopping($tunnel, $reason) !== '') {
+            return $this->getTunnel($userId, $deviceId);
         }
 
         try {
@@ -78,17 +89,45 @@ class RemoteRdpTunnelService
     public function reconcileStoppingTunnels($limit = 100)
     {
         $actualByPort = (new RemoteFrpsMonitorService($this->config))->getTcpProxiesByPort();
-        $tunnels = Db::name('remote_rdp_tunnel')->where('public_port', 'not null')
-            ->where('status', 'stopping')->order('id asc')->limit(max(1, (int)$limit))->select();
+        $portManager = new RemotePortManagerService($this->config);
+        $enabledPorts = $portManager->getEnabledTcpPorts();
+        $limit = max(1, (int)$limit);
         $released = 0;
-        foreach ($tunnels as $tunnel) {
-            $actual = $actualByPort[(int)$tunnel['public_port']] ?? null;
-            if (!$this->isProxyOnline($actual)) {
-                $this->releaseTunnel($tunnel);
-                $released++;
+        $accessFailed = 0;
+        $lastId = 0;
+        while ($released < $limit) {
+            $tunnels = Db::name('remote_rdp_tunnel')->where('id', '>', $lastId)->where('public_port', 'not null')
+                ->where('status', 'stopping')->order('id asc')->limit(100)->select();
+            if (!$tunnels) {
+                break;
+            }
+            foreach ($tunnels as $tunnel) {
+                $lastId = (int)$tunnel['id'];
+                $port = (int)$tunnel['public_port'];
+                if (isset($enabledPorts[$port])) {
+                    try {
+                        $portManager->setTcpPortEnabled($port, false);
+                        unset($enabledPorts[$port]);
+                    } catch (\Exception $e) {
+                        $this->updateLastError($tunnel, '关闭公网访问失败：' . $e->getMessage());
+                        $accessFailed++;
+                        continue;
+                    }
+                }
+                $actual = $actualByPort[$port] ?? null;
+                if (!$this->isProxyOnline($actual)) {
+                    $this->releaseTunnel($tunnel);
+                    $released++;
+                    if ($released >= $limit) {
+                        break 2;
+                    }
+                }
+            }
+            if (count($tunnels) < 100) {
+                break;
             }
         }
-        return ['released' => $released];
+        return ['released' => $released, 'access_failed' => $accessFailed];
     }
 
     protected function releaseTunnel(array $tunnel)
@@ -123,8 +162,11 @@ class RemoteRdpTunnelService
         $deviceId = $this->normalizeDeviceId($deviceId);
         $tunnel = Db::name('remote_rdp_tunnel')->where('user_id', $userId)->where('device_id', $deviceId)->find();
         if ($tunnel && !empty($tunnel['public_port'])) {
-            $this->markStopping($tunnel, $reason);
+            $accessError = $this->markStopping($tunnel, $reason);
             $tunnel = Db::name('remote_rdp_tunnel')->where('id', $tunnel['id'])->find();
+            if ($accessError !== '') {
+                throw new Exception($accessError);
+            }
         }
         return $this->buildPayload($tunnel, false);
     }
@@ -236,8 +278,23 @@ class RemoteRdpTunnelService
 
     protected function markStopping(array $tunnel, $reason)
     {
+        $accessError = '';
+        try {
+            (new RemotePortManagerService($this->config))->setTcpPortEnabled((int)$tunnel['public_port'], false);
+        } catch (\Exception $e) {
+            $accessError = '关闭公网访问失败：' . $e->getMessage();
+            $reason = trim((string)$reason) . '；' . $accessError;
+        }
         Db::name('remote_rdp_tunnel')->where('id', $tunnel['id'])->update([
             'status' => 'stopping', 'last_error' => substr((string)$reason, 0, 255), 'updated_at' => time(),
+        ]);
+        return $accessError;
+    }
+
+    protected function updateLastError(array $tunnel, $message)
+    {
+        Db::name('remote_rdp_tunnel')->where('id', $tunnel['id'])->update([
+            'last_error' => substr((string)$message, 0, 255), 'updated_at' => time(),
         ]);
     }
 

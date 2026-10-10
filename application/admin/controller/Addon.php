@@ -60,6 +60,7 @@ class Addon extends Backend
         }
         $info = get_addon_info($name);
         $config = get_addon_fullconfig($name);
+        $config = $this->mergeLocalAddonConfig($name, $config);
         if (!$info) {
             $this->error(__('Addon not exists'));
         }
@@ -78,14 +79,18 @@ class Addon extends Backend
                     }
                 }
                 try {
-                    $addon = get_addon_instance($name);
-                    //插件自定义配置实现逻辑
-                    if (method_exists($addon, 'config')) {
-                        $addon->config($name, $config);
+                    if ($this->usesLocalAddonConfig($name)) {
+                        $this->saveLocalAddonConfig($name, $config);
                     } else {
-                        //更新配置文件
-                        set_addon_fullconfig($name, $config);
-                        Service::refresh();
+                        $addon = get_addon_instance($name);
+                        //插件自定义配置实现逻辑
+                        if (method_exists($addon, 'config')) {
+                            $addon->config($name, $config);
+                        } else {
+                            //更新配置文件
+                            set_addon_fullconfig($name, $config);
+                            Service::refresh();
+                        }
                     }
                 } catch (Exception $e) {
                     $this->error(__($e->getMessage()));
@@ -119,6 +124,62 @@ class Addon extends Backend
         $configFile = ADDON_PATH . $name . DS . 'config.html';
         $viewFile = is_file($configFile) ? $configFile : '';
         return $this->view->fetch($viewFile);
+    }
+
+    protected function usesLocalAddonConfig($name)
+    {
+        return Config::get('app_debug') && in_array($name, ['remotecontrol', 'epay'], true);
+    }
+
+    protected function mergeLocalAddonConfig($name, array $config)
+    {
+        if (!$this->usesLocalAddonConfig($name)) {
+            return $config;
+        }
+        $localFile = ADDON_PATH . $name . DS . 'config.local.php';
+        if (!is_file($localFile)) {
+            return $config;
+        }
+        $localConfig = include $localFile;
+        if (!is_array($localConfig)) {
+            return $config;
+        }
+        $values = [];
+        foreach ($localConfig as $key => $value) {
+            if (is_array($value) && isset($value['name']) && array_key_exists('value', $value)) {
+                $values[(string)$value['name']] = $value['value'];
+            } elseif (is_string($key)) {
+                $values[$key] = $value;
+            }
+        }
+        foreach ($config as &$item) {
+            $itemName = (string)($item['name'] ?? '');
+            if (!array_key_exists($itemName, $values)) {
+                continue;
+            }
+            $item['value'] = is_array($item['value']) && is_array($values[$itemName])
+                ? array_replace_recursive($item['value'], $values[$itemName])
+                : $values[$itemName];
+        }
+        unset($item);
+        return $config;
+    }
+
+    protected function saveLocalAddonConfig($name, array $config)
+    {
+        $values = [];
+        foreach ($config as $item) {
+            if (isset($item['name'])) {
+                $values[(string)$item['name']] = $item['value'] ?? '';
+            }
+        }
+        $content = "<?php\n\nreturn " . var_export($values, true) . ";\n";
+        $localFile = ADDON_PATH . $name . DS . 'config.local.php';
+        if (file_put_contents($localFile, $content, LOCK_EX) === false) {
+            throw new Exception('本地插件配置写入失败');
+        }
+        @chmod($localFile, 0600);
+        get_addon_instance($name)->setConfig($name, $values);
     }
 
     /**

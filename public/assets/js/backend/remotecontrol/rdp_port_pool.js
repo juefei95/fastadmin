@@ -11,6 +11,8 @@ define(['jquery', 'bootstrap', 'backend', 'table'], function ($, undefined, Back
                 Fast.api.ajax({
                     url: 'remotecontrol/rdp_port_pool/' + (open ? 'openaccess' : 'closeaccess'),
                     data: {ids: ports.join(',')}
+                }, function () {
+                    table.bootstrapTable('refresh');
                 });
             };
             table.bootstrapTable({
@@ -43,6 +45,7 @@ define(['jquery', 'bootstrap', 'backend', 'table'], function ($, undefined, Back
                     {field: 'actual_proxy_name', title: 'FRPS 实际代理名', escape: true},
                     {field: 'actual_status', title: 'FRPS 状态', escape: true},
                     {field: 'monitor_error', title: '监控说明', escape: true},
+                    {field: 'public_access_error', title: '公网访问说明', escape: true},
                     {field: 'operate', title: '公网访问操作', events: {
                         'click .btn-access-row-open': function (e, value, row) {
                             updateAccess(true, [row.port]);

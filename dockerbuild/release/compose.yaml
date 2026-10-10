@@ -4,6 +4,8 @@ services:
   web:
     image: webdevops/php-apache:7.4
     container_name: fastadmin-rustdesk-release-web
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     ports:
       - "80:80"

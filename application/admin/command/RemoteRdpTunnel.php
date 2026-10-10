@@ -20,6 +20,6 @@ class RemoteRdpTunnel extends Command
         $service = new RemoteRdpTunnelService();
         $marked = $service->markInvalidTunnels();
         $released = $service->reconcileStoppingTunnels();
-        $output->writeln("Marked {$marked['marked']} expired RDP tunnel(s) for shutdown; released {$released['released']} stopped tunnel(s).");
+        $output->writeln("Marked {$marked['marked']} expired RDP tunnel(s) for shutdown; released {$released['released']} stopped tunnel(s); {$released['access_failed']} port close operation(s) failed.");
     }
 }

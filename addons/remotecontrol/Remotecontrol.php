@@ -4,6 +4,7 @@ namespace addons\remotecontrol;
 
 use app\common\library\Menu;
 use think\Addons;
+use think\Config;
 use think\Db;
 
 /**
@@ -11,6 +12,35 @@ use think\Db;
  */
 class Remotecontrol extends Addons
 {
+    protected function _initialize()
+    {
+        if (!Config::get('app_debug')) {
+            return;
+        }
+        $localFile = $this->addonPath . 'config.local.php';
+        if (!is_file($localFile)) {
+            return;
+        }
+        $localConfig = include $localFile;
+        if (is_array($localConfig)) {
+            $localConfig = $this->normalizeLocalConfig($localConfig);
+            $config = array_replace_recursive($this->getConfig($this->getName(), true), $localConfig);
+            $this->setConfig($this->getName(), $config);
+        }
+    }
+
+    protected function normalizeLocalConfig(array $localConfig)
+    {
+        $normalized = [];
+        foreach ($localConfig as $key => $value) {
+            if (is_array($value) && isset($value['name']) && array_key_exists('value', $value)) {
+                $normalized[(string)$value['name']] = $value['value'];
+            } elseif (is_string($key)) {
+                $normalized[$key] = $value;
+            }
+        }
+        return $normalized;
+    }
 
     /**
      * 插件安装方法

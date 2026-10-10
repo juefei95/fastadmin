@@ -4,10 +4,12 @@ services:
   web:
     image: webdevops/php-dev:7.4
     container_name: fastadmin-rustdesk-debug-web
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     working_dir: /app
     command: php -S 0.0.0.0:8000 -t public
     ports:
-      - "8000:8000"
+      - "8002:8000"
     volumes:
       - ../:/app
       - ./xdebug.ini:/usr/local/etc/php/conf.d/99-xdebug.ini
@@ -18,7 +20,7 @@ services:
 
       XDEBUG_MODE: debug,develop
       XDEBUG_CLIENT_HOST: host.docker.internal
-      XDEBUG_CLIENT_PORT: "9003"
+      XDEBUG_CLIENT_PORT: "9004"
       XDEBUG_CONFIG: "start_with_request=yes"
 
       APP_DEBUG: "true"
@@ -62,7 +64,7 @@ services:
     image: phpmyadmin:5
     container_name: fastadmin-rustdesk-debug-phpmyadmin
     ports:
-      - "8081:80"
+      - "8082:80"
     environment:
       PMA_HOST: mysql
       PMA_PORT: "3306"
