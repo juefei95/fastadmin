@@ -3,6 +3,7 @@
 namespace addons\gamerank;
 
 use think\Addons;
+use think\Config;
 use app\common\library\Menu;
 
 /**
@@ -10,6 +11,36 @@ use app\common\library\Menu;
  */
 class Gamerank extends Addons
 {
+    protected function _initialize()
+    {
+        if (!Config::get('app_debug')) {
+            return;
+        }
+        $localFile = $this->addonPath . 'config.local.php';
+        if (!is_file($localFile)) {
+            return;
+        }
+        $localConfig = include $localFile;
+        if (is_array($localConfig)) {
+            $localConfig = $this->normalizeLocalConfig($localConfig);
+            $config = array_replace_recursive($this->getConfig($this->getName(), true), $localConfig);
+            $this->setConfig($this->getName(), $config);
+        }
+    }
+
+    protected function normalizeLocalConfig(array $localConfig)
+    {
+        $normalized = [];
+        foreach ($localConfig as $key => $value) {
+            if (is_array($value) && isset($value['name']) && array_key_exists('value', $value)) {
+                $normalized[(string)$value['name']] = $value['value'];
+            } elseif (is_string($key)) {
+                $normalized[$key] = $value;
+            }
+        }
+        return $normalized;
+    }
+
     public function install()
     {
         $third = get_addon_info('third');

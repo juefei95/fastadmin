@@ -10,8 +10,10 @@
 
 1. 安装并启用 `third` 插件。
 2. 安装并启用 `gamerank` 插件：`php think addon -a=gamerank -c=install`，随后执行 `php think addon -a=gamerank -c=enable`。
-3. 在插件设置的“微信小游戏”中填写小游戏 AppID 和 AppSecret。
+3. 正式环境在插件设置的“微信小游戏”中填写小游戏 AppID 和 AppSecret。
 4. 在微信公众平台把后端域名配置为合法请求域名。
+
+开发环境（`app_debug=true`）会优先读取 `addons/gamerank/config.local.php`；该文件已被 `.gitignore` 忽略，适合保存本机的 AppID 和 AppSecret。生产环境不会读取它，仍以后台保存的 `config.php` 配置为准。调试环境在后台保存“游戏排行榜”配置时会写入 `config.local.php`，不会改动正式配置；该本地文件同时兼容与 `config.php` 相同的完整配置数组及后台生成的 `name => value` 简化数组。
 
 插件启用时会把插件内的 `application/admin/` 和 `public/assets/` 文件复制到主应用，因此后台侧栏会出现“游戏排行榜”，其中包含“游戏玩家”、“曲目成绩”和“积分流水”三个只读管理页面。插件源代码保留在 `addons/gamerank/`，不要手工复制这些文件。
 
