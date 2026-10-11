@@ -32,15 +32,18 @@ class Api extends CommonApi
             $user = MiniProgramLogin::login($code, $this->config());
             $player = PlayerService::ensurePlayer($user);
             $token = $this->auth->getToken();
-            $this->success('', [
-                // 不依赖会员字段白名单，明确向小游戏返回本次登录令牌。
-                'token'    => $token,
-                'userinfo' => $this->auth->getUserinfo(),
-                'player'   => $this->playerData($player),
-            ]);
         } catch (\Exception $e) {
             $this->error($e->getMessage());
         }
+
+        // success() 通过抛出 HttpResponseException 结束请求，不能被上面的
+        // 登录异常处理捕获，否则会把成功响应误报为登录失败。
+        $this->success('', [
+            // 不依赖会员字段白名单，明确向小游戏返回本次登录令牌。
+            'token'    => $token,
+            'userinfo' => $this->auth->getUserinfo(),
+            'player'   => $this->playerData($player),
+        ]);
     }
 
     public function leaderboard()
