@@ -19,3 +19,5 @@ composer.lock
 .vscode
 node_modules
 .user.ini
+
+config.local.php
