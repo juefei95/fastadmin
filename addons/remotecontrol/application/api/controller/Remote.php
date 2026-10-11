@@ -78,13 +78,17 @@ class Remote extends remote\Index
     {
         $pathinfo = strtolower(trim($this->request->pathinfo(), '/'));
         if (!preg_match('#^api/remote/rdp/(status|open|config|started|close)$#', $pathinfo, $matches)) {
+            \think\Log::warning('[RDP-FRPC] unsupported path=' . $pathinfo);
             $this->error(__('Invalid parameters'));
         }
         $action = $matches[1];
-        if ((in_array($action, ['status', 'config'], true) && !$this->request->isGet()) || ($action !== 'status' && !$this->request->isPost())) {
+        if ((in_array($action, ['status', 'config'], true) && !$this->request->isGet()) || (!in_array($action, ['status', 'config'], true) && !$this->request->isPost())) {
+            \think\Log::warning('[RDP-FRPC] invalid method action=' . $action . ' method=' . $this->request->method());
             $this->error(__('Invalid parameters'));
         }
         $deviceId = in_array($action, ['status', 'config'], true) ? (string)$this->request->get('device_id', '') : (string)$this->request->post('device_id', '');
+        \think\Log::info('[RDP-FRPC] action=' . $action . ' user_id=' . (int)$this->auth->id
+            . ' device_id_present=' . ($deviceId === '' ? 'N' : 'Y'));
         try {
             $service = new RemoteRdpTunnelService();
             if ($action === 'status') {
