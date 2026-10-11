@@ -30,3 +30,22 @@ CREATE TABLE IF NOT EXISTS `__PREFIX__game_rank_point_log` (
   KEY `idx_user_time` (`user_id`,`createtime`),
   KEY `idx_source` (`source_type`,`source_ref`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='游戏排行榜积分流水';
+
+CREATE TABLE IF NOT EXISTS `__PREFIX__game_rank_record` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` int(10) unsigned NOT NULL COMMENT '会员ID',
+  `game_code` varchar(32) NOT NULL DEFAULT 'paw_beat' COMMENT '游戏标识',
+  `song_id` varchar(64) NOT NULL COMMENT '曲目标识',
+  `difficulty` varchar(32) NOT NULL COMMENT '难度标识',
+  `best_score` int(11) NOT NULL DEFAULT '0' COMMENT '最佳成绩',
+  `best_accuracy` int(11) NOT NULL DEFAULT '0' COMMENT '最佳准确率，万分比',
+  `max_combo` int(11) NOT NULL DEFAULT '0' COMMENT '最佳连击',
+  `last_score` int(11) NOT NULL DEFAULT '0' COMMENT '最近成绩',
+  `play_count` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '游玩次数',
+  `last_played_at` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '最后游玩时间',
+  `createtime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `updatetime` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_player_chart` (`user_id`,`game_code`,`song_id`,`difficulty`),
+  KEY `idx_chart_rank` (`game_code`,`song_id`,`difficulty`,`best_score`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='游戏曲目难度成绩';

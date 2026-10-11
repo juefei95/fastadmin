@@ -4,6 +4,7 @@ namespace addons\gamerank\service;
 
 use addons\gamerank\model\Player;
 use addons\gamerank\model\PointLog;
+use addons\gamerank\model\Record;
 use app\common\model\User;
 use think\Db;
 
@@ -35,7 +36,7 @@ class PlayerService
         }
     }
 
-    public static function settle($userId, $points, $roundId, $remark = '')
+    public static function settle($userId, $points, $roundId, array $chart, $remark = '')
     {
         $idempotencyKey = 'game:' . $userId . ':' . $roundId;
         Db::startTrans();
@@ -46,7 +47,7 @@ class PlayerService
                     throw new \RuntimeException('局次标识已被其他玩家使用');
                 }
                 Db::commit();
-                return ['log' => $existing, 'duplicated' => true];
+                return ['log' => $existing, 'record' => self::findRecord($userId, $chart), 'duplicated' => true];
             }
 
             $player = Player::where('user_id', $userId)->lock(true)->find();
@@ -57,6 +58,30 @@ class PlayerService
             $before = intval($player->total_points);
             $after = $before + intval($points);
             $now = time();
+            $record = self::findRecord($userId, $chart, true);
+            if (!$record) {
+                $record = Record::create([
+                    'user_id'       => $userId,
+                    'game_code'     => $chart['game_code'],
+                    'song_id'       => $chart['song_id'],
+                    'difficulty'    => $chart['difficulty'],
+                    'best_score'    => 0,
+                    'best_accuracy' => 0,
+                    'max_combo'     => 0,
+                    'last_score'    => 0,
+                    'play_count'    => 0,
+                    'last_played_at'=> 0,
+                ], true);
+            }
+            $isBest = self::isBetterScore($chart, $record);
+            $record->save([
+                'best_score'     => $isBest ? $chart['score'] : $record->best_score,
+                'best_accuracy'  => $isBest ? $chart['accuracy'] : $record->best_accuracy,
+                'max_combo'      => $isBest ? $chart['max_combo'] : $record->max_combo,
+                'last_score'     => $chart['score'],
+                'play_count'     => intval($record->play_count) + 1,
+                'last_played_at' => $now,
+            ]);
             $player->save([
                 'total_points'      => $after,
                 'last_played_at'    => $now,
@@ -73,7 +98,7 @@ class PlayerService
                 'remark'          => $remark,
             ], true);
             Db::commit();
-            return ['log' => $log, 'duplicated' => false];
+            return ['log' => $log, 'record' => $record->refresh(), 'duplicated' => false];
         } catch (\Exception $e) {
             Db::rollback();
             throw $e;
@@ -91,5 +116,43 @@ class PlayerService
                 ->where('total_points', intval($player->total_points))
                 ->where('id', '<', intval($player->id))->count()
             + 1;
+    }
+
+    public static function findRecord($userId, array $chart, $lock = false)
+    {
+        $query = Record::where('user_id', $userId)
+            ->where('game_code', $chart['game_code'])
+            ->where('song_id', $chart['song_id'])
+            ->where('difficulty', $chart['difficulty']);
+        return $lock ? $query->lock(true)->find() : $query->find();
+    }
+
+    public static function recordRank(Record $record)
+    {
+        $recordTable = $record->getTable();
+        $playerTable = (new Player())->getTable();
+        return Db::table($recordTable)->alias('record')
+            ->join($playerTable . ' player', 'player.user_id = record.user_id')
+            ->where('player.rank_visible', 1)
+            ->where('record.game_code', $record->game_code)
+            ->where('record.song_id', $record->song_id)
+            ->where('record.difficulty', $record->difficulty)
+            ->where(function ($query) use ($record) {
+                $query->where('record.best_score', '>', intval($record->best_score))
+                    ->whereOr(function ($query) use ($record) {
+                        $query->where('record.best_score', intval($record->best_score))
+                            ->where('record.id', '<', intval($record->id));
+                    });
+            })->count() + 1;
+    }
+
+    protected static function isBetterScore(array $chart, Record $record)
+    {
+        return intval($chart['score']) > intval($record->best_score)
+            || (intval($chart['score']) === intval($record->best_score)
+                && intval($chart['accuracy']) > intval($record->best_accuracy))
+            || (intval($chart['score']) === intval($record->best_score)
+                && intval($chart['accuracy']) === intval($record->best_accuracy)
+                && intval($chart['max_combo']) > intval($record->max_combo));
     }
 }

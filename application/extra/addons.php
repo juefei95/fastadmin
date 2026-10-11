@@ -3,6 +3,9 @@
 return [
     'autoload' => false,
     'hooks' => [
+        'upgrade' => [
+            'gamerank',
+        ],
         'user_delete_successed' => [
             'third',
         ],

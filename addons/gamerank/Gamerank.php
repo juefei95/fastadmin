@@ -42,6 +42,31 @@ class Gamerank extends Addons
         return true;
     }
 
+    public function upgrade()
+    {
+        $prefix = \think\Config::get('database.prefix');
+        \think\Db::execute("CREATE TABLE IF NOT EXISTS `{$prefix}game_rank_record` (
+            `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            `user_id` int(10) unsigned NOT NULL,
+            `game_code` varchar(32) NOT NULL DEFAULT 'paw_beat',
+            `song_id` varchar(64) NOT NULL,
+            `difficulty` varchar(32) NOT NULL,
+            `best_score` int(11) NOT NULL DEFAULT '0',
+            `best_accuracy` int(11) NOT NULL DEFAULT '0',
+            `max_combo` int(11) NOT NULL DEFAULT '0',
+            `last_score` int(11) NOT NULL DEFAULT '0',
+            `play_count` int(11) unsigned NOT NULL DEFAULT '0',
+            `last_played_at` int(10) unsigned NOT NULL DEFAULT '0',
+            `createtime` int(10) unsigned NOT NULL DEFAULT '0',
+            `updatetime` int(10) unsigned NOT NULL DEFAULT '0',
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `uk_player_chart` (`user_id`,`game_code`,`song_id`,`difficulty`),
+            KEY `idx_chart_rank` (`game_code`,`song_id`,`difficulty`,`best_score`,`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='游戏曲目难度成绩'");
+        Menu::create($this->menu());
+        return true;
+    }
+
     protected function menu()
     {
         return [[
@@ -49,8 +74,9 @@ class Gamerank extends Addons
             'title'   => '游戏排行榜',
             'icon'    => 'fa fa-trophy',
             'sublist' => [
-                ['name' => 'gamerank/player', 'title' => '游戏玩家'],
-                ['name' => 'gamerank/pointlog', 'title' => '积分流水'],
+                ['name' => 'gamerank/player', 'title' => '游戏玩家', 'ismenu' => 1],
+                ['name' => 'gamerank/record', 'title' => '曲目成绩', 'ismenu' => 1],
+                ['name' => 'gamerank/pointlog', 'title' => '积分流水', 'ismenu' => 1],
             ],
         ]];
     }

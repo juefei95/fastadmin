@@ -45,6 +45,31 @@ define(['jquery', 'bootstrap', 'backend', 'table'], function ($, undefined, Back
                 ]]
             });
             Table.api.bindevent(table);
+        },
+        record: function () {
+            Table.api.init({extend: {index_url: 'gamerank/record' + location.search, table: 'game_rank_record'}});
+            var table = $('#table');
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'best_score',
+                sortOrder: 'desc',
+                columns: [[
+                    {field: 'id', title: __('Id')},
+                    {field: 'user_id', title: __('User_id'), formatter: Table.api.formatter.search},
+                    {field: 'user.username', title: __('Username')},
+                    {field: 'game_code', title: __('Game_code'), formatter: Table.api.formatter.search},
+                    {field: 'song_id', title: __('Song_id'), formatter: Table.api.formatter.search},
+                    {field: 'difficulty', title: __('Difficulty'), formatter: Table.api.formatter.search},
+                    {field: 'best_score', title: __('Best_score'), sortable: true},
+                    {field: 'best_accuracy', title: __('Best_accuracy'), sortable: true},
+                    {field: 'max_combo', title: __('Max_combo'), sortable: true},
+                    {field: 'last_score', title: __('Last_score'), sortable: true},
+                    {field: 'play_count', title: __('Play_count'), sortable: true},
+                    {field: 'last_played_at', title: __('Last_played_at'), sortable: true, operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime}
+                ]]
+            });
+            Table.api.bindevent(table);
         }
     };
     return Controller;

@@ -65,4 +65,20 @@ class Gamerank extends Backend
         }
         return $this->view->fetch();
     }
+
+    public function record()
+    {
+        $this->relationSearch = true;
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            if ($this->request->request('keyField')) return $this->selectpage();
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $model = new \app\admin\model\GamerankRecord;
+            $total = $model->with(['user'])->where($where)->order($sort, $order)->count();
+            $list = $model->with(['user'])->where($where)->order($sort, $order)->limit($offset, $limit)->select();
+            foreach ($list as $item) if ($item->user) $item->user->visible(['username', 'nickname']);
+            return json(['total' => $total, 'rows' => collection($list)->toArray()]);
+        }
+        return $this->view->fetch();
+    }
 }
