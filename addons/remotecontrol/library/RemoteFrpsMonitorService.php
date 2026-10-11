@@ -15,6 +15,11 @@ class RemoteFrpsMonitorService
 
     public function getTcpProxiesByPort()
     {
+        $min = (int)($this->config['rdp_port_min'] ?? RemoteRdpTunnelService::PORT_MIN);
+        $max = (int)($this->config['rdp_port_max'] ?? RemoteRdpTunnelService::PORT_MAX);
+        if ($min < 1 || $max > 65535 || $min > $max) {
+            throw new Exception('Windows 远程桌面端口池范围配置无效');
+        }
         $url = rtrim(trim((string)($this->config['frps_dashboard_url'] ?? '')), '/');
         if ($url === '') {
             throw new Exception('请先配置 FRPS Dashboard 地址');
@@ -49,7 +54,7 @@ class RemoteFrpsMonitorService
         foreach ($data['proxies'] as $proxy) {
             $conf = isset($proxy['conf']) && is_array($proxy['conf']) ? $proxy['conf'] : [];
             $port = (int)($conf['remotePort'] ?? $conf['remote_port'] ?? $proxy['remotePort'] ?? $proxy['remote_port'] ?? 0);
-            if ($port < RemoteRdpTunnelService::PORT_MIN || $port > RemoteRdpTunnelService::PORT_MAX) {
+            if ($port < $min || $port > $max) {
                 continue;
             }
             $result[$port] = [

@@ -16,8 +16,10 @@ class RdpPortPool extends Backend
             return $this->view->fetch();
         }
 
+        $tunnelService = new RemoteRdpTunnelService();
+        list($min, $max) = $tunnelService->getPortRange();
         $mappings = Db::name('remote_rdp_tunnel')
-            ->where('public_port', 'between', [RemoteRdpTunnelService::PORT_MIN, RemoteRdpTunnelService::PORT_MAX])
+            ->where('public_port', 'between', [$min, $max])
             ->select();
         $mappingByPort = [];
         foreach ($mappings as $mapping) {
@@ -39,7 +41,7 @@ class RdpPortPool extends Backend
         }
 
         $rows = [];
-        for ($port = RemoteRdpTunnelService::PORT_MIN; $port <= RemoteRdpTunnelService::PORT_MAX; $port++) {
+        for ($port = $min; $port <= $max; $port++) {
             $mapping = $mappingByPort[$port] ?? null;
             $actual = $actualByPort[$port] ?? null;
             $actualOnline = $actual && strtolower(trim((string)$actual['status'])) === 'online';
@@ -103,9 +105,10 @@ class RdpPortPool extends Backend
             $this->error('请选择端口');
         }
         $ports = array_values(array_unique($ports));
+        list($min, $max) = (new RemoteRdpTunnelService())->getPortRange();
         foreach ($ports as $port) {
-            if (!ctype_digit($port) || (int)$port < RemoteRdpTunnelService::PORT_MIN || (int)$port > RemoteRdpTunnelService::PORT_MAX) {
-                $this->error('端口必须在 6011-6999 范围内');
+            if (!ctype_digit($port) || (int)$port < $min || (int)$port > $max) {
+                $this->error('端口必须在 ' . $min . '-' . $max . ' 范围内');
             }
         }
         $service = new RemotePortManagerService();

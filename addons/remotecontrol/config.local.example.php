@@ -7,6 +7,8 @@ return [
     'api_server' => 'https://api.example.com',
     'public_key' => '',
     'rdp_public_host' => 'rdp.example.com',
+    'rdp_port_min' => 7011,
+    'rdp_port_max' => 7999,
     'frpc_server_port' => 7000,
     'frpc_token' => '',
     'frpc_protocol' => 'quic',

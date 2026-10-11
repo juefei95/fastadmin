@@ -7,8 +7,8 @@ use think\Exception;
 
 class RemoteRdpTunnelService
 {
-    const PORT_MIN = 6011;
-    const PORT_MAX = 6999;
+    const PORT_MIN = 7011;
+    const PORT_MAX = 7999;
 
     protected $memberService;
     protected $config;
@@ -17,6 +17,16 @@ class RemoteRdpTunnelService
     {
         $this->memberService = $memberService ?: new RemoteMemberService();
         $this->config = $config === null ? get_addon_config('remotecontrol') : $config;
+    }
+
+    public function getPortRange()
+    {
+        $min = (int)$this->getConfig('rdp_port_min', self::PORT_MIN);
+        $max = (int)$this->getConfig('rdp_port_max', self::PORT_MAX);
+        if ($min < 1 || $max > 65535 || $min > $max) {
+            throw new Exception('Windows 远程桌面端口池范围配置无效');
+        }
+        return [$min, $max];
     }
 
     public function getTunnel($userId, $deviceId)
@@ -301,14 +311,15 @@ class RemoteRdpTunnelService
 
     protected function findAvailablePort(array $actualByPort)
     {
-        $used = Db::name('remote_rdp_tunnel')->where('public_port', 'between', [self::PORT_MIN, self::PORT_MAX])->lock(true)->column('public_port');
+        list($min, $max) = $this->getPortRange();
+        $used = Db::name('remote_rdp_tunnel')->where('public_port', 'between', [$min, $max])->lock(true)->column('public_port');
         $used = array_flip(array_map('intval', $used));
         foreach ($actualByPort as $port => $proxy) {
             if ($this->isProxyOnline($proxy)) {
                 $used[(int)$port] = true;
             }
         }
-        for ($port = self::PORT_MIN; $port <= self::PORT_MAX; $port++) {
+        for ($port = $min; $port <= $max; $port++) {
             if (!isset($used[$port])) {
                 return $port;
             }
