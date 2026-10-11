@@ -156,6 +156,37 @@ class RemoteRdpTunnelService
         return $this->getTunnel($userId, $deviceId);
     }
 
+    public function getFrpcConfig($userId, $deviceId)
+    {
+        $userId = $this->normalizeUserId($userId);
+        $deviceId = $this->normalizeDeviceId($deviceId);
+        if (!$this->memberService->canControl($userId)) {
+            $this->markInvalidTunnelsForUser($userId);
+            throw new Exception('会员权益无效，无法获取 Windows 远程桌面穿透参数');
+        }
+        $tunnel = Db::name('remote_rdp_tunnel')->where('user_id', $userId)->where('device_id', $deviceId)->find();
+        if (!$tunnel || empty($tunnel['public_port']) || !in_array($tunnel['status'], ['pending', 'allocated', 'active'], true)) {
+            throw new Exception('请先申请 Windows 远程桌面端口');
+        }
+        $serverAddr = trim((string)$this->getConfig('rdp_public_host', ''));
+        $serverPort = (int)$this->getConfig('frpc_server_port', 0);
+        $token = trim((string)$this->getConfig('frpc_token', ''));
+        $protocol = strtolower(trim((string)$this->getConfig('frpc_protocol', 'quic')));
+        if ($serverAddr === '' || $serverPort < 1 || $serverPort > 65535 || $token === '') {
+            throw new Exception('FRPC 服务参数尚未配置完整');
+        }
+        if (!in_array($protocol, ['quic', 'tcp'], true)) {
+            throw new Exception('FRPC 协议配置无效');
+        }
+        return [
+            'server_addr' => $serverAddr, 'server_port' => $serverPort,
+            'token' => $token, 'protocol' => $protocol,
+            'proxy_name' => (string)$tunnel['proxy_name'],
+            'local_ip' => '127.0.0.1', 'local_port' => 3389,
+            'remote_port' => (int)$tunnel['public_port'],
+        ];
+    }
+
     public function requestStop($userId, $deviceId, $reason = 'admin')
     {
         $userId = $this->normalizeUserId($userId);

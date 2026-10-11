@@ -77,20 +77,22 @@ class Remote extends remote\Index
     public function rdp()
     {
         $pathinfo = strtolower(trim($this->request->pathinfo(), '/'));
-        if (!preg_match('#^api/remote/rdp/(status|open|started|close)$#', $pathinfo, $matches)) {
+        if (!preg_match('#^api/remote/rdp/(status|open|config|started|close)$#', $pathinfo, $matches)) {
             $this->error(__('Invalid parameters'));
         }
         $action = $matches[1];
-        if (($action === 'status' && !$this->request->isGet()) || ($action !== 'status' && !$this->request->isPost())) {
+        if ((in_array($action, ['status', 'config'], true) && !$this->request->isGet()) || ($action !== 'status' && !$this->request->isPost())) {
             $this->error(__('Invalid parameters'));
         }
-        $deviceId = $action === 'status' ? (string)$this->request->get('device_id', '') : (string)$this->request->post('device_id', '');
+        $deviceId = in_array($action, ['status', 'config'], true) ? (string)$this->request->get('device_id', '') : (string)$this->request->post('device_id', '');
         try {
             $service = new RemoteRdpTunnelService();
             if ($action === 'status') {
                 $data = $service->getTunnel($this->auth->id, $deviceId);
             } elseif ($action === 'open') {
                 $data = $service->activate($this->auth->id, $deviceId);
+            } elseif ($action === 'config') {
+                $data = $service->getFrpcConfig($this->auth->id, $deviceId);
             } elseif ($action === 'started') {
                 $data = $service->confirmStarted($this->auth->id, $deviceId);
             } else {
