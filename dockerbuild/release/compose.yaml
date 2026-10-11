@@ -16,7 +16,7 @@ services:
       APP_TRACE: "false"
       DATABASE_TYPE: mysql
       DATABASE_HOSTNAME: mysql
-      DATABASE_DATABASE: cmsdata
+      DATABASE_DATABASE: cxdata
       DATABASE_USERNAME: fastadmin
       DATABASE_PASSWORD: fastadmin
       DATABASE_HOSTPORT: "3306"
