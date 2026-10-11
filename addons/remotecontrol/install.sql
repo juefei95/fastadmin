@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `__PREFIX__remote_rdp_tunnel` (
   `device_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'RustDesk设备ID',
   `proxy_name` varchar(128) NOT NULL DEFAULT '' COMMENT 'FRP代理名称',
   `public_port` int(10) unsigned DEFAULT NULL COMMENT 'FRP公网端口',
-  `status` varchar(20) NOT NULL DEFAULT 'inactive' COMMENT '状态:inactive=未启用,allocated=已分配,active=运行中,stopping=等待客户端停止',
+  `status` varchar(20) NOT NULL DEFAULT 'inactive' COMMENT '状态:inactive=未启用,allocated=已分配,active=运行中,stopping=等待客户端FRPC断开',
   `last_error` varchar(255) NOT NULL DEFAULT '' COMMENT '最近错误',
   `created_at` bigint(16) DEFAULT NULL COMMENT '创建时间',
   `updated_at` bigint(16) DEFAULT NULL COMMENT '更新时间',

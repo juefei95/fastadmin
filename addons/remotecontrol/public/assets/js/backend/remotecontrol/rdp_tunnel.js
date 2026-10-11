@@ -14,7 +14,7 @@ define(['jquery', 'bootstrap', 'backend', 'table'], function ($, undefined, Back
                     {field: 'public_port', title: '公网端口', operate: '='},
                     {field: 'status', title: '状态', operate: '=', formatter: function (value) {
                         var labels = {active: 'label-success', allocated: 'label-info', pending: 'label-info', stopping: 'label-warning', inactive: 'label-default'};
-                        var names = {active: '运行中', allocated: '已分配', pending: '已分配', stopping: '等待客户端停止', inactive: '未启用'};
+                        var names = {active: '运行中', allocated: '已分配', pending: '已分配', stopping: '等待 FRPC 断开', inactive: '未启用'};
                         return '<span class="label ' + (labels[value] || 'label-default') + '">' + (names[value] || value) + '</span>';
                     }},
                     {field: 'expire_time', title: '会员到期', operate: false, formatter: function (value, row, index) { return value ? Table.api.formatter.datetime(value, row, index) : '-'; }},

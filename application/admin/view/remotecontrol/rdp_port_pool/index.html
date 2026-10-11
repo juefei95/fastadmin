@@ -31,7 +31,7 @@
                         <tr><td>代理状态</td><td>监控不可用</td><td>FRPS Dashboard 未配置、认证失败或连接失败，且端口没有数据库映射。</td></tr>
                         <tr><td>公网访问状态</td><td>开放 / 关闭 / 未知</td><td>“开放”表示 port-manager 已允许该 TCP 端口；“关闭”表示已拦截；“未知”表示端口管理接口配置错误、连接失败或返回异常。</td></tr>
                         <tr><td>用户 ID / 设备 ID</td><td>数字 / RustDesk设备标识</td><td>显示当前获得该端口的用户和设备；未分配时为空。</td></tr>
-                        <tr><td>后台状态</td><td>pending / allocated / active / stopping / inactive</td><td>依次表示等待分配确认、已分配、运行中、等待客户端停止、已停止。</td></tr>
+                        <tr><td>后台状态</td><td>pending / allocated / active / stopping / inactive</td><td>依次表示等待分配确认、已分配、运行中、等待客户端 FRPC 断开、已停止；不会停止共享 FRPS 服务。</td></tr>
                         <tr><td>预期代理名</td><td>rustdesk-rdp-u...-d...</td><td>后端生成并要求客户端启动 frpc 时使用的代理名称。</td></tr>
                         <tr><td>FRPS 实际代理名</td><td>FRPS返回的代理名称</td><td>从 FRPS Dashboard 实时读取，用于和预期代理名核对。</td></tr>
                         <tr><td>FRPS 状态</td><td>online / offline / 空</td><td>FRPS 返回的原始代理运行状态；空表示未查询到代理。</td></tr>
