@@ -3,6 +3,8 @@
 /vendor/
 /runtime/*
 /addons/*
+!/addons/gamerank/
+!/addons/gamerank/**
 /public/assets/libs/
 /public/assets/addons/*
 /public/uploads/*

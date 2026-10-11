@@ -1,0 +1,58 @@
+<?php
+
+return [
+    [
+        'name'    => 'mini_program',
+        'title'   => '微信小游戏',
+        'type'    => 'array',
+        'content' => [
+            'app_id'     => '',
+            'app_secret' => '',
+        ],
+        'value'   => [
+            'app_id'     => '',
+            'app_secret' => '',
+        ],
+        'rule'    => '',
+        'msg'     => '',
+        'tip'     => '填写微信小游戏后台的 AppID 与 AppSecret；不要填写公众号或小程序的凭据。',
+        'ok'      => '',
+        'extend'  => '',
+    ],
+    [
+        'name'    => 'login_keeptime',
+        'title'   => '登录有效期（秒）',
+        'type'    => 'number',
+        'content' => [],
+        'value'   => '2592000',
+        'rule'    => 'required|integer|egt:0',
+        'msg'     => '',
+        'tip'     => '0 表示使用系统默认值。',
+        'ok'      => '',
+        'extend'  => '',
+    ],
+    [
+        'name'    => 'max_points_per_settlement',
+        'title'   => '单局最大积分',
+        'type'    => 'number',
+        'content' => [],
+        'value'   => '500',
+        'rule'    => 'required|integer|egt:1',
+        'msg'     => '',
+        'tip'     => '客户端结算的上限保护；正式竞技榜仍应在服务端校验成绩。',
+        'ok'      => '',
+        'extend'  => '',
+    ],
+    [
+        'name'    => 'leaderboard_limit',
+        'title'   => '榜单单页上限',
+        'type'    => 'number',
+        'content' => [],
+        'value'   => '50',
+        'rule'    => 'required|integer|between:1,100',
+        'msg'     => '',
+        'tip'     => '',
+        'ok'      => '',
+        'extend'  => '',
+    ],
+];
