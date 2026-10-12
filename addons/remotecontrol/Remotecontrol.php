@@ -49,6 +49,7 @@ class Remotecontrol extends Addons
     public function install()
     {
         $this->ensureDeviceTable();
+        $this->ensureLoginDeviceTable();
         $this->ensureRdpTunnelTable();
         if (!$this->installApiFiles() || !$this->installAssets() || !$this->registerHeartbeatRoutes()) {
             return false;
@@ -78,6 +79,7 @@ class Remotecontrol extends Addons
     public function enable()
     {
         $this->ensureDeviceTable();
+        $this->ensureLoginDeviceTable();
         $this->ensureRdpTunnelTable();
         if (!Menu::upgrade('remotecontrol', $this->getMenu())) {
             throw new \think\Exception('更新远控菜单失败');
@@ -108,6 +110,7 @@ class Remotecontrol extends Addons
             Db::execute("UPDATE `{$table}` SET `original_price` = `price` * 2");
         }
         $this->ensureDeviceTable();
+        $this->ensureLoginDeviceTable();
         $this->ensureRdpTunnelTable();
         if (!Menu::upgrade('remotecontrol', $this->getMenu())) {
             throw new \think\Exception('更新远控设备状态菜单失败');
@@ -167,6 +170,25 @@ class Remotecontrol extends Addons
         Db::name('remote_rdp_tunnel')->where('status', 'disable_failed')->update(['status' => 'stopping']);
     }
 
+    protected function ensureLoginDeviceTable()
+    {
+        $table = config('database.prefix') . 'remote_login_device';
+        Db::execute("CREATE TABLE IF NOT EXISTS `{$table}` (
+            `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+            `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+            `device_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'RustDesk设备ID',
+            `device_uuid` varchar(128) NOT NULL DEFAULT '' COMMENT '设备UUID',
+            `token` varchar(64) NOT NULL DEFAULT '' COMMENT '登录令牌',
+            `created_at` bigint(16) DEFAULT NULL COMMENT '首次登录时间',
+            `updated_at` bigint(16) DEFAULT NULL COMMENT '更新时间',
+            `last_login_at` bigint(16) DEFAULT NULL COMMENT '最近登录时间',
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `user_device_uuid` (`user_id`,`device_uuid`),
+            UNIQUE KEY `token` (`token`),
+            KEY `user_id` (`user_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='远控账号登录设备表'");
+    }
+
     protected function installApiFiles()
     {
         $files = [
@@ -185,6 +207,7 @@ class Remotecontrol extends Addons
         ];
         $overwrite = [
             'api' . DS . 'controller' . DS . 'Remote.php',
+            'api' . DS . 'controller' . DS . 'remote' . DS . 'Index.php',
             'admin' . DS . 'command' . DS . 'RemoteRdpTunnel.php',
             'admin' . DS . 'controller' . DS . 'remotecontrol' . DS . 'RdpTunnel.php',
             'admin' . DS . 'model' . DS . 'remotecontrol' . DS . 'RdpTunnel.php',

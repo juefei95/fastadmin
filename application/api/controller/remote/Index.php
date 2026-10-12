@@ -3,6 +3,7 @@
 namespace app\api\controller\remote;
 
 use addons\remotecontrol\library\RemoteMemberService;
+use addons\remotecontrol\library\RemoteLoginDeviceService;
 use addons\remotecontrol\library\RemotePackageService;
 use app\common\controller\Api;
 use app\common\library\Sms;
@@ -28,7 +29,7 @@ class Index extends Api
         }
 
         $action = strtolower($this->request->action());
-        if (in_array($action, ['login', 'mobilelogin', 'sms', 'claimtrial'], true) && !$this->request->isPost()) {
+        if (in_array($action, ['login', 'mobilelogin', 'sms', 'claimtrial', 'logout'], true) && !$this->request->isPost()) {
             $this->error(__('Invalid parameters'));
         }
         if ($action === 'status' && !$this->request->isGet()) {
@@ -51,6 +52,8 @@ class Index extends Api
         if (!$ret) {
             $this->error($this->auth->getError());
         }
+
+        $this->registerLoginDevice();
 
         $member = null;
         try {
@@ -124,6 +127,8 @@ class Index extends Api
             $this->error($this->auth->getError());
         }
 
+        $this->registerLoginDevice();
+
         Sms::flush($mobile, 'mobilelogin');
         try {
             $service = new RemoteMemberService();
@@ -153,6 +158,19 @@ class Index extends Api
         }
 
         $this->success('', $this->getMemberPayload($member, $service, $userId));
+    }
+
+    public function logout()
+    {
+        $token = $this->auth->getToken();
+        try {
+            (new RemoteLoginDeviceService())->removeByToken($token);
+            $this->auth->logout();
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
+
+        $this->success(__('Logout successful'));
     }
 
     public function status()
@@ -190,6 +208,21 @@ class Index extends Api
             'expire_time'       => $expireTime ? date('Y-m-d H:i:s', $expireTime) : null,
             'remaining_seconds' => $expireTime ? max(0, $expireTime - time()) : 0,
         ];
+    }
+
+    protected function registerLoginDevice()
+    {
+        try {
+            (new RemoteLoginDeviceService())->registerLogin(
+                $this->auth->id,
+                $this->request->post('device_id', ''),
+                $this->request->post('device_uuid', ''),
+                $this->auth->getToken()
+            );
+        } catch (Exception $e) {
+            $this->auth->logout();
+            $this->error($e->getMessage());
+        }
     }
 
     public function packages()

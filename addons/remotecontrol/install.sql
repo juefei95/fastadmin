@@ -71,6 +71,21 @@ CREATE TABLE IF NOT EXISTS `__PREFIX__remote_device` (
   KEY `last_seen_at` (`last_seen_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='远控客户端设备心跳表';
 
+CREATE TABLE IF NOT EXISTS `__PREFIX__remote_login_device` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `device_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'RustDesk设备ID',
+  `device_uuid` varchar(128) NOT NULL DEFAULT '' COMMENT '设备UUID',
+  `token` varchar(64) NOT NULL DEFAULT '' COMMENT '登录令牌',
+  `created_at` bigint(16) DEFAULT NULL COMMENT '首次登录时间',
+  `updated_at` bigint(16) DEFAULT NULL COMMENT '更新时间',
+  `last_login_at` bigint(16) DEFAULT NULL COMMENT '最近登录时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_device_uuid` (`user_id`,`device_uuid`),
+  UNIQUE KEY `token` (`token`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='远控账号登录设备表';
+
 CREATE TABLE IF NOT EXISTS `__PREFIX__remote_rdp_tunnel` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',

@@ -12,3 +12,4 @@
 -- DROP TABLE IF EXISTS `__PREFIX__remote_member`;
 -- DROP TABLE IF EXISTS `__PREFIX__remote_package`;
 -- DROP TABLE IF EXISTS `__PREFIX__remote_device`;
+-- DROP TABLE IF EXISTS `__PREFIX__remote_login_device`;
