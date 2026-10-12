@@ -57,7 +57,6 @@ class Api extends CommonApi
 
         if ($type === 'chart') {
             $chart = $this->chartInput();
-            $recordTable = (new Record())->getTable();
             $playerTable = (new Player())->getTable();
             $records = Record::alias('record')
                 ->join($playerTable . ' player', 'player.user_id = record.user_id')
@@ -79,19 +78,46 @@ class Api extends CommonApi
                     'max_combo'     => intval($record->max_combo),
                 ];
             }
+            $total = Record::alias('record')->join($playerTable . ' player', 'player.user_id = record.user_id')
+                ->where('player.rank_visible', 1)->where($chart)->count();
             $mine = null;
             if ($this->auth->isLogin()) {
+                $player = PlayerService::ensurePlayer($this->auth->getUser());
                 $mineRecord = PlayerService::findRecord($this->auth->id, $chart);
                 if ($mineRecord) {
                     $mine = $this->recordData($mineRecord);
+                } elseif ($total === 0 && $offset === 0 && $player->rank_visible) {
+                    // 首次进入某个曲目难度时，也让当前玩家作为零分第 1 名展示，
+                    // 避免已登录却看到“0 位玩家”的空榜体验。
+                    $mine = [
+                        'game_code'  => $chart['game_code'],
+                        'song_id'    => $chart['song_id'],
+                        'difficulty' => $chart['difficulty'],
+                        'score'      => 0,
+                        'accuracy'   => 0,
+                        'max_combo'  => 0,
+                        'play_count' => 0,
+                        'last_score' => 0,
+                        'rank'       => 1,
+                    ];
+                    if (count($list) < $limit) {
+                        $list[] = [
+                            'rank'      => 1,
+                            'nickname'  => $player->nickname,
+                            'avatar_url'=> $player->avatar_url,
+                            'score'     => 0,
+                            'accuracy'  => 0,
+                            'max_combo' => 0,
+                        ];
+                    }
+                    $total = 1;
                 }
             }
             $this->success('', [
                 'type'  => 'chart',
                 'chart' => $chart,
                 'list'  => $list,
-                'total' => Record::alias('record')->join($playerTable . ' player', 'player.user_id = record.user_id')
-                    ->where('player.rank_visible', 1)->where($chart)->count(),
+                'total' => $total,
                 'mine'  => $mine,
             ]);
         }
