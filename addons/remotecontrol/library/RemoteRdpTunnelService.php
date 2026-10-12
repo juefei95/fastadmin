@@ -69,44 +69,17 @@ class RemoteRdpTunnelService
     {
         $userId = $this->normalizeUserId($userId);
         $deviceId = $this->normalizeDeviceId($deviceId);
+        if (!$this->memberService->canControl($userId)) {
+            $this->markInvalidTunnelsForUser($userId);
+            return $this->getTunnel($userId, $deviceId);
+        }
         $tunnel = Db::name('remote_rdp_tunnel')->where('user_id', $userId)->where('device_id', $deviceId)->find();
         if (!$tunnel || empty($tunnel['public_port'])) {
             return $this->buildPayload($tunnel);
         }
-        if ($this->markStopping($tunnel, $reason) !== '') {
-            return $this->getTunnel($userId, $deviceId);
-        }
-
-        $actual = null;
-        try {
-            for ($attempt = 0; $attempt < 5; $attempt++) {
-                $actualByPort = (new RemoteFrpsMonitorService($this->config))->getTcpProxiesByPort();
-                $actual = $actualByPort[(int)$tunnel['public_port']] ?? null;
-                if (!$this->isProxyOnline($actual) || $attempt === 4) {
-                    break;
-                }
-                usleep(500000);
-            }
-        } catch (\Exception $e) {
-            $this->markStopping($tunnel, '等待 FRPS 确认客户端 FRPC 已断开：' . $e->getMessage());
-            return $this->getTunnel($userId, $deviceId);
-        }
-        if ($this->isProxyOnline($actual)) {
-            \think\Log::warning('[RDP-FRPC] stop pending port=' . (int)$tunnel['public_port']
-                . ' expected_proxy=' . (string)$tunnel['proxy_name']
-                . ' actual_proxy=' . (string)($actual['name'] ?? '')
-                . ' actual_status=' . (string)($actual['status'] ?? '')
-                . ' attempts=' . ($attempt + 1));
-            $message = (string)($actual['name'] ?? '') === (string)$tunnel['proxy_name']
-                ? '等待客户端 FRPC 断开'
-                : '端口仍被其他 FRPS 代理占用';
-            $this->markStopping($tunnel, $message);
-            return $this->getTunnel($userId, $deviceId);
-        }
-
-        $this->releaseTunnel($tunnel);
-        \think\Log::info('[RDP-FRPC] stop confirmed port=' . (int)$tunnel['public_port']
-            . ' attempts=' . ($attempt + 1));
+        Db::name('remote_rdp_tunnel')->where('id', $tunnel['id'])->update([
+            'status' => 'allocated', 'last_error' => '', 'updated_at' => time(),
+        ]);
         return $this->getTunnel($userId, $deviceId);
     }
 
