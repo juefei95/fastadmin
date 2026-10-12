@@ -195,7 +195,7 @@ class RemoteRdpTunnelService
         $serverAddr = trim((string)$this->getConfig('rdp_public_host', ''));
         $serverPort = (int)$this->getConfig('frpc_server_port', 0);
         $token = trim((string)$this->getConfig('frpc_token', ''));
-        $protocol = strtolower(trim((string)$this->getConfig('frpc_protocol', 'quic')));
+        $protocol = strtolower(trim((string)$this->getConfig('frpc_protocol', 'tcp')));
         if ($serverAddr === '' || $serverPort < 1 || $serverPort > 65535 || $token === '') {
             throw new Exception('FRPC 服务参数尚未配置完整');
         }

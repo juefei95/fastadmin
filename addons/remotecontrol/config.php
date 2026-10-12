@@ -270,7 +270,7 @@ return [
             'quic' => 'QUIC',
             'tcp'  => 'TCP',
         ],
-        'value'   => 'quic',
+        'value'   => 'tcp',
         'rule'    => 'required',
         'msg'     => '',
         'tip'     => 'FRPC 到 FRPS 的传输协议。',
