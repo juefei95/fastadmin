@@ -135,6 +135,14 @@ class RemoteRdpTunnelService
         ]);
     }
 
+    protected function reconcileStoppingTunnel(array $tunnel)
+    {
+        $actualByPort = (new RemoteFrpsMonitorService($this->config))->getTcpProxiesByPort();
+        if (!$this->isProxyOnline($actualByPort[(int)$tunnel['public_port']] ?? null)) {
+            $this->releaseTunnel($tunnel);
+        }
+    }
+
     public function confirmStarted($userId, $deviceId)
     {
         $userId = $this->normalizeUserId($userId);
@@ -191,6 +199,13 @@ class RemoteRdpTunnelService
         $tunnel = Db::name('remote_rdp_tunnel')->where('user_id', $userId)->where('device_id', $deviceId)->find();
         if ($tunnel && !empty($tunnel['public_port'])) {
             $accessError = $this->markStopping($tunnel, $reason);
+            if ($accessError === '') {
+                try {
+                    $this->reconcileStoppingTunnel($tunnel);
+                } catch (\Exception $e) {
+                    $this->updateLastError($tunnel, '读取 FRPS 状态失败：' . $e->getMessage());
+                }
+            }
             $tunnel = Db::name('remote_rdp_tunnel')->where('id', $tunnel['id'])->find();
             if ($accessError !== '') {
                 throw new Exception($accessError);
