@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS `fa_game_rank_record` (
   `song_id` varchar(64) NOT NULL,
   `difficulty` varchar(32) NOT NULL,
   `best_score` int(11) NOT NULL DEFAULT '0',
+  `total_score` bigint(20) unsigned NOT NULL DEFAULT '0',
   `best_accuracy` int(11) NOT NULL DEFAULT '0',
   `max_combo` int(11) NOT NULL DEFAULT '0',
   `last_score` int(11) NOT NULL DEFAULT '0',

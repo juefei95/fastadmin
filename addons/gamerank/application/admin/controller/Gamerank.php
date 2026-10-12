@@ -54,6 +54,9 @@ class Gamerank extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $model = new \app\admin\model\GamerankPointLog;
+            if ($sort === 'id') {
+                $sort = $model->getTable() . '.id';
+            }
             $total = $model->with(['user'])->where($where)->order($sort, $order)->count();
             $list = $model->with(['user'])->where($where)->order($sort, $order)->limit($offset, $limit)->select();
             foreach ($list as $item) {

@@ -66,6 +66,7 @@ class PlayerService
                     'song_id'       => $chart['song_id'],
                     'difficulty'    => $chart['difficulty'],
                     'best_score'    => 0,
+                    'total_score'   => 0,
                     'best_accuracy' => 0,
                     'max_combo'     => 0,
                     'last_score'    => 0,
@@ -76,6 +77,7 @@ class PlayerService
             $isBest = self::isBetterScore($chart, $record);
             $record->save([
                 'best_score'     => $isBest ? $chart['score'] : $record->best_score,
+                'total_score'    => intval($record->total_score) + intval($chart['score']),
                 'best_accuracy'  => $isBest ? $chart['accuracy'] : $record->best_accuracy,
                 'max_combo'      => $isBest ? $chart['max_combo'] : $record->max_combo,
                 'last_score'     => $chart['score'],

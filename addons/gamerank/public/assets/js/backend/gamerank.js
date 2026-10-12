@@ -26,6 +26,9 @@ define(['jquery', 'bootstrap', 'backend', 'table'], function ($, undefined, Back
         pointlog: function () {
             Table.api.init({extend: {index_url: 'gamerank/pointlog' + location.search, table: 'game_rank_point_log'}});
             var table = $('#table');
+            var sourceTypes = {
+                game_settlement: '游戏结算'
+            };
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
@@ -38,7 +41,9 @@ define(['jquery', 'bootstrap', 'backend', 'table'], function ($, undefined, Back
                     {field: 'delta', title: __('Delta'), sortable: true},
                     {field: 'points_before', title: __('Points_before')},
                     {field: 'points_after', title: __('Points_after')},
-                    {field: 'source_type', title: __('Source_type'), formatter: Table.api.formatter.search},
+                    {field: 'source_type', title: __('Source_type'), searchList: sourceTypes, formatter: function (value) {
+                        return sourceTypes[value] || value || '-';
+                    }},
                     {field: 'source_ref', title: __('Source_ref'), formatter: Table.api.formatter.search},
                     {field: 'remark', title: __('Remark')},
                     {field: 'createtime', title: __('Createtime'), sortable: true, operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime}
@@ -62,6 +67,7 @@ define(['jquery', 'bootstrap', 'backend', 'table'], function ($, undefined, Back
                     {field: 'song_id', title: __('Song_id'), formatter: Table.api.formatter.search},
                     {field: 'difficulty', title: __('Difficulty'), formatter: Table.api.formatter.search},
                     {field: 'best_score', title: __('Best_score'), sortable: true},
+                    {field: 'total_score', title: __('Total_score'), sortable: true},
                     {field: 'best_accuracy', title: __('Best_accuracy'), sortable: true},
                     {field: 'max_combo', title: __('Max_combo'), sortable: true},
                     {field: 'last_score', title: __('Last_score'), sortable: true},

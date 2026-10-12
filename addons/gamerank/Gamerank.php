@@ -83,6 +83,7 @@ class Gamerank extends Addons
             `song_id` varchar(64) NOT NULL,
             `difficulty` varchar(32) NOT NULL,
             `best_score` int(11) NOT NULL DEFAULT '0',
+            `total_score` bigint(20) unsigned NOT NULL DEFAULT '0',
             `best_accuracy` int(11) NOT NULL DEFAULT '0',
             `max_combo` int(11) NOT NULL DEFAULT '0',
             `last_score` int(11) NOT NULL DEFAULT '0',
@@ -94,6 +95,11 @@ class Gamerank extends Addons
             UNIQUE KEY `uk_player_chart` (`user_id`,`game_code`,`song_id`,`difficulty`),
             KEY `idx_chart_rank` (`game_code`,`song_id`,`difficulty`,`best_score`,`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='游戏曲目难度成绩'");
+        $recordTable = $prefix . 'game_rank_record';
+        $columns = \think\Db::query("SHOW COLUMNS FROM `{$recordTable}` LIKE 'total_score'");
+        if (!$columns) {
+            \think\Db::execute("ALTER TABLE `{$recordTable}` ADD `total_score` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '累计成绩' AFTER `best_score`");
+        }
         Menu::create($this->menu());
         return true;
     }

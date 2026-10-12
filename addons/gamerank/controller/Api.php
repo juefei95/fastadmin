@@ -74,6 +74,7 @@ class Api extends CommonApi
                     'nickname'      => $record->nickname,
                     'avatar_url'    => $record->avatar_url,
                     'score'         => intval($record->best_score),
+                    'total_score'   => intval($record->total_score),
                     'accuracy'      => intval($record->best_accuracy),
                     'max_combo'     => intval($record->max_combo),
                 ];
@@ -94,6 +95,7 @@ class Api extends CommonApi
                         'song_id'    => $chart['song_id'],
                         'difficulty' => $chart['difficulty'],
                         'score'      => 0,
+                        'total_score'=> 0,
                         'accuracy'   => 0,
                         'max_combo'  => 0,
                         'play_count' => 0,
@@ -106,6 +108,7 @@ class Api extends CommonApi
                             'nickname'  => $player->nickname,
                             'avatar_url'=> $player->avatar_url,
                             'score'     => 0,
+                            'total_score'=> 0,
                             'accuracy'  => 0,
                             'max_combo' => 0,
                         ];
@@ -224,14 +227,17 @@ class Api extends CommonApi
             $player = PlayerService::ensurePlayer($this->auth->getUser());
             $result = PlayerService::settle($player->user_id, intval($points), $roundId, $chart, $remark);
             $player = Player::get($player->id);
-            $this->success('', [
-                'duplicated' => $result['duplicated'],
-                'player'     => $this->playerData($player),
-                'record'     => $this->recordData($result['record']),
-            ]);
         } catch (\Exception $e) {
             $this->error($e->getMessage());
         }
+
+        // 与 login() 一样，success() 会抛出 HttpResponseException 结束请求；
+        // 必须位于登录/结算异常捕获之外，避免已提交的数据被客户端误判为失败。
+        $this->success('', [
+            'duplicated' => $result['duplicated'],
+            'player'     => $this->playerData($player),
+            'record'     => $this->recordData($result['record']),
+        ]);
     }
 
     protected function playerData(Player $player)
@@ -267,6 +273,7 @@ class Api extends CommonApi
             'song_id'       => $record->song_id,
             'difficulty'    => $record->difficulty,
             'score'         => intval($record->best_score),
+            'total_score'   => intval($record->total_score),
             'accuracy'      => intval($record->best_accuracy),
             'max_combo'     => intval($record->max_combo),
             'play_count'    => intval($record->play_count),

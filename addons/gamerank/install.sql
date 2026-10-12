@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `__PREFIX__game_rank_record` (
   `song_id` varchar(64) NOT NULL COMMENT '曲目标识',
   `difficulty` varchar(32) NOT NULL COMMENT '难度标识',
   `best_score` int(11) NOT NULL DEFAULT '0' COMMENT '最佳成绩',
+  `total_score` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '累计成绩',
   `best_accuracy` int(11) NOT NULL DEFAULT '0' COMMENT '最佳准确率，万分比',
   `max_combo` int(11) NOT NULL DEFAULT '0' COMMENT '最佳连击',
   `last_score` int(11) NOT NULL DEFAULT '0' COMMENT '最近成绩',

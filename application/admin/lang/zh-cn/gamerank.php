@@ -14,6 +14,7 @@ return [
     'Song_id'           => '曲目',
     'Difficulty'        => '难度',
     'Best_score'        => '最佳成绩',
+    'Total_score'       => '累计成绩',
     'Best_accuracy'     => '最佳准确率（万分比）',
     'Max_combo'         => '最高连击',
     'Last_score'        => '最近成绩',
