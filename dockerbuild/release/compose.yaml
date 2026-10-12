@@ -46,7 +46,7 @@ services:
       - --sql-mode=NO_ENGINE_SUBSTITUTION
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cmsdata
+      MYSQL_DATABASE: cxgamedata
       MYSQL_USER: fastadmin
       MYSQL_PASSWORD: fastadmin
       TZ: Asia/Shanghai

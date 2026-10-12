@@ -50,7 +50,7 @@ services:
       - ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cxdata
+      MYSQL_DATABASE: cxgamedata
       MYSQL_USER: fastadmin
       MYSQL_PASSWORD: fastadmin
       TZ: Asia/Shanghai
