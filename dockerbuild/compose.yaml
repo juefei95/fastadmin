@@ -9,7 +9,7 @@ services:
     working_dir: /app
     command: php -S 0.0.0.0:8000 -t public
     ports:
-      - "8002:8000"
+      - "8005:8000"
     volumes:
       - ../:/app
       - ./xdebug.ini:/usr/local/etc/php/conf.d/99-xdebug.ini
@@ -64,7 +64,7 @@ services:
     image: phpmyadmin:5
     container_name: fastadmin-rustdesk-debug-phpmyadmin
     ports:
-      - "8082:80"
+      - "8006:80"
     environment:
       PMA_HOST: mysql
       PMA_PORT: "3306"
