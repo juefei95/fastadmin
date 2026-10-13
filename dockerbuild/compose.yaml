@@ -1,9 +1,9 @@
-name: fastadmin-ld-debug
+name: fastadmin-wechatqrcodelogin-debug
 
 services:
   web:
     image: webdevops/php-dev:7.4
-    container_name: fastadmin-ld-debug-web
+    container_name: fastadmin-wechatqrcodelogin-debug-web
     extra_hosts:
       - "host.docker.internal:host-gateway"
     working_dir: /app
@@ -28,7 +28,7 @@ services:
 
       DATABASE_TYPE: mysql
       DATABASE_HOSTNAME: mysql
-      DATABASE_DATABASE: cmsdata
+      DATABASE_DATABASE: wechatqrcodelogindata
       DATABASE_USERNAME: root
       DATABASE_PASSWORD: root
       DATABASE_HOSTPORT: "3306"
@@ -40,17 +40,17 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: fastadmin-ld-debug-mysql
+    container_name: fastadmin-wechatqrcodelogin-debug-mysql
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --sql-mode=NO_ENGINE_SUBSTITUTION
     volumes:
-      - fastadmin-ld-debug-mysql-data:/var/lib/mysql
+      - fastadmin-wechatqrcodelogin-debug-mysql-data:/var/lib/mysql
       - ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cmsdata
+      MYSQL_DATABASE: wechatqrcodelogindata
       MYSQL_USER: fastadmin
       MYSQL_PASSWORD: fastadmin
       TZ: Asia/Shanghai
@@ -62,7 +62,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin:5
-    container_name: fastadmin-ld-debug-phpmyadmin
+    container_name: fastadmin-wechatqrcodelogin-debug-phpmyadmin
     ports:
       - "8081:80"
     environment:
@@ -77,4 +77,4 @@ services:
 
 
 volumes:
-  fastadmin-ld-debug-mysql-data:
+  fastadmin-wechatqrcodelogin-debug-mysql-data:
