@@ -20,7 +20,7 @@ class PlayerService
         try {
             return Player::create([
                 'user_id'           => $user->id,
-                'nickname'          => mb_substr((string)$user->nickname, 0, 32),
+                'nickname'          => Text::slice($user->nickname, 0, 32),
                 'avatar_url'        => (string)$user->avatar,
                 'total_points'      => 0,
                 'rank_visible'      => 1,

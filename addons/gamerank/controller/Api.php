@@ -6,6 +6,7 @@ use addons\gamerank\model\Player;
 use addons\gamerank\model\Record;
 use addons\gamerank\service\MiniProgramLogin;
 use addons\gamerank\service\PlayerService;
+use addons\gamerank\service\Text;
 use app\common\controller\Api as CommonApi;
 
 class Api extends CommonApi
@@ -167,7 +168,7 @@ class Api extends CommonApi
         $data = [];
         if ($this->request->has('nickname', 'post')) {
             $nickname = trim($this->request->post('nickname', ''));
-            if (!$nickname || mb_strlen($nickname) > 32) {
+            if (!$nickname || Text::length($nickname) > 32) {
                 $this->error('昵称长度应为 1 至 32 个字符');
             }
             $data['nickname'] = $nickname;
@@ -177,7 +178,7 @@ class Api extends CommonApi
             if ($avatarUrl && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
                 $this->error('头像地址无效');
             }
-            $data['avatar_url'] = mb_substr($avatarUrl, 0, 255);
+            $data['avatar_url'] = Text::slice($avatarUrl, 0, 255);
         }
         if ($this->request->has('rank_visible', 'post')) {
             $data['rank_visible'] = $this->request->post('rank_visible') ? 1 : 0;
@@ -186,7 +187,7 @@ class Api extends CommonApi
             $this->error('没有可更新的资料');
         }
         $player->save($data);
-        $this->success('', ['player' => $this->playerData($player->refresh())]);
+        $this->success('', ['player' => $this->playerData(Player::get($player->id))]);
     }
 
     public function settle()
