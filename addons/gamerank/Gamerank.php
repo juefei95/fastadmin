@@ -73,6 +73,20 @@ class Gamerank extends Addons
         return true;
     }
 
+    /**
+     * Remove the game data that belongs to a deleted member.
+     *
+     * Auth::delete() invokes this hook inside its database transaction, so a
+     * failed cleanup also rolls the member deletion back.
+     */
+    public function userDeleteSuccessed(\app\common\model\User $user)
+    {
+        $where = ['user_id' => $user->id];
+        \think\Db::name('game_rank_record')->where($where)->delete();
+        \think\Db::name('game_rank_point_log')->where($where)->delete();
+        \think\Db::name('game_rank_player')->where($where)->delete();
+    }
+
     public function upgrade()
     {
         $prefix = \think\Config::get('database.prefix');
