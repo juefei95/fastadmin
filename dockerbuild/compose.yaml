@@ -47,7 +47,7 @@ services:
       - --sql-mode=NO_ENGINE_SUBSTITUTION
     volumes:
       - fastadmin-wechatqrcodelogin-debug-mysql-data:/var/lib/mysql
-      - ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
+      #- ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wechatqrcodelogindata
