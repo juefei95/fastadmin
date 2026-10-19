@@ -8,7 +8,7 @@ services:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
     ports:
-      - "8003:80"
+      - "5009:80"
     environment:
       PHP_DATE_TIMEZONE: Asia/Shanghai
       WEB_DOCUMENT_ROOT: /app/public
@@ -52,7 +52,7 @@ services:
       TZ: Asia/Shanghai
     volumes:
       - ld-backend-paw-beat-release-mysql-data:/var/lib/mysql
-      - ../../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
+      #- ../../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
       interval: 5s

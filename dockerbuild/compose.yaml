@@ -9,7 +9,7 @@ services:
     working_dir: /app
     command: php -S 0.0.0.0:8000 -t public
     ports:
-      - "8003:8000"
+      - "5109:8000"
     volumes:
       - ../:/app
       - ./xdebug.ini:/usr/local/etc/php/conf.d/99-xdebug.ini
@@ -47,7 +47,7 @@ services:
       - --sql-mode=NO_ENGINE_SUBSTITUTION
     volumes:
       - ld-backend-paw-beat-debug-mysql-data:/var/lib/mysql
-      - ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
+      #- ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: cxgamedata
@@ -64,7 +64,7 @@ services:
     image: phpmyadmin:5
     container_name: ld-backend-paw-beat-debug-phpmyadmin
     ports:
-      - "8004:80"
+      - "5110:80"
     environment:
       PMA_HOST: mysql
       PMA_PORT: "3306"
