@@ -1,0 +1,38 @@
+<div class="panel panel-default panel-intro">
+    <div class="panel-heading">{$heading|htmlentities} · 毛球象棋社</div>
+    <div class="panel-body">
+        <table id="pawchess-table" class="table table-striped table-bordered table-hover"></table>
+        <button id="pawchess-prev" class="btn btn-default">上一页</button>
+        <span id="pawchess-page"></span>
+        <button id="pawchess-next" class="btn btn-default">下一页</button>
+    </div>
+</div>
+<script>
+(function () {
+    var page = 0, size = 20, table = document.getElementById('pawchess-table');
+    function render() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', location.pathname + '?offset=' + page * size + '&limit=' + size);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.onload = function () {
+            if (xhr.status !== 200) return;
+            var result = JSON.parse(xhr.responseText), rows = result.rows || [];
+            var keys = rows.length ? Object.keys(rows[0]) : [];
+            table.textContent = '';
+            var head = table.createTHead().insertRow();
+            keys.forEach(function (key) { head.insertCell().textContent = key; });
+            var body = table.createTBody();
+            rows.forEach(function (row) { var tr = body.insertRow(); keys.forEach(function (key) {
+                var value = row[key]; tr.insertCell().textContent = value == null ? '' : String(value).slice(0, 180);
+            }); });
+            document.getElementById('pawchess-page').textContent = '第 ' + (page + 1) + ' 页 · 共 ' + result.total + ' 条';
+            document.getElementById('pawchess-prev').disabled = page === 0;
+            document.getElementById('pawchess-next').disabled = (page + 1) * size >= result.total;
+        };
+        xhr.send();
+    }
+    document.getElementById('pawchess-prev').onclick = function () { if (page) { page--; render(); } };
+    document.getElementById('pawchess-next').onclick = function () { page++; render(); };
+    render();
+})();
+</script>

@@ -5,10 +5,18 @@ return [
     'hooks' => [
         'user_delete_successed' => [
             'gamerank',
+            'pawchess',
             'third',
         ],
         'upgrade' => [
             'gamerank',
+            'pawchess',
+        ],
+        'app_init' => [
+            'pawchess',
+        ],
+        'app_dispatch' => [
+            'pawchess',
         ],
         'user_logout_successed' => [
             'third',
