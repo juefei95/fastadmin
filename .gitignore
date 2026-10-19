@@ -3,6 +3,7 @@
 /vendor/
 /runtime/*
 /addons/*
+!/addons/pawchess/
 /public/assets/libs/
 /public/assets/addons/*
 /public/uploads/*

@@ -4,7 +4,17 @@ return [
     'autoload' => false,
     'hooks' => [
         'user_delete_successed' => [
+            'pawchess',
             'third',
+        ],
+        'upgrade' => [
+            'pawchess',
+        ],
+        'app_init' => [
+            'pawchess',
+        ],
+        'app_dispatch' => [
+            'pawchess',
         ],
         'user_logout_successed' => [
             'third',
