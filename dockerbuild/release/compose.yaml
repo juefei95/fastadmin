@@ -8,7 +8,7 @@ services:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
     ports:
-      - "8015:80"
+      - "5009:80"
     environment:
       PHP_DATE_TIMEZONE: Asia/Shanghai
       WEB_DOCUMENT_ROOT: /app/public
