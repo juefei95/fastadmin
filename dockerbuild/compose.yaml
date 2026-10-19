@@ -9,7 +9,7 @@ services:
     working_dir: /app
     command: php -S 0.0.0.0:8000 -t public
     ports:
-      - "8000:8000"
+      - "5191:8000"
     volumes:
       - ../:/app
       - ./xdebug.ini:/usr/local/etc/php/conf.d/99-xdebug.ini
@@ -28,7 +28,7 @@ services:
 
       DATABASE_TYPE: mysql
       DATABASE_HOSTNAME: mysql
-      DATABASE_DATABASE: cmsdata
+      DATABASE_DATABASE: lidiandata
       DATABASE_USERNAME: root
       DATABASE_PASSWORD: root
       DATABASE_HOSTPORT: "3306"
@@ -47,10 +47,10 @@ services:
       - --sql-mode=NO_ENGINE_SUBSTITUTION
     volumes:
       - fastadmin-ld-debug-mysql-data:/var/lib/mysql
-      - ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
+      #- ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cmsdata
+      MYSQL_DATABASE: lidiandata
       MYSQL_USER: fastadmin
       MYSQL_PASSWORD: fastadmin
       TZ: Asia/Shanghai
@@ -64,7 +64,7 @@ services:
     image: phpmyadmin:5
     container_name: fastadmin-ld-debug-phpmyadmin
     ports:
-      - "8081:80"
+      - "5192:80"
     environment:
       PMA_HOST: mysql
       PMA_PORT: "3306"
