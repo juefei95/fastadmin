@@ -259,7 +259,7 @@ return [
         // 驱动方式
         'type'     => 'Mysql',
         // 缓存前缀
-        'key'      => 'i3d6o32wo8fvs1fvdpwens',
+        'key'      => 'WMHXBz40Z8SEairNPdQpRLtGkKsmC6l9',
         // 加密方式
         'hashalgo' => 'ripemd160',
         // 缓存有效期 0表示永久缓存
@@ -322,7 +322,7 @@ return [
         //后台是否启用面包屑
         'breadcrumb'            => false,
         //是否允许未知来源的插件压缩包
-        'unknownsources'        => false,
+        'unknownsources'        => true,
         //插件启用禁用时是否备份对应的全局文件
         'backup_global_files'   => true,
         //是否开启后台自动日志记录
