@@ -4,6 +4,7 @@
 /runtime/*
 /addons/*
 !/addons/wallet
+!/addons/checkin
 /public/assets/libs/
 /public/assets/addons/*
 /public/uploads/*
