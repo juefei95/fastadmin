@@ -5,6 +5,7 @@ return [
     'hooks' => [
         'user_delete_successed' => [
             'third',
+            'wallet',
         ],
         'user_logout_successed' => [
             'third',
@@ -20,6 +21,12 @@ return [
         ],
         'view_filter' => [
             'third',
+        ],
+        'app_init' => [
+            'wallet',
+        ],
+        'user_register_successed' => [
+            'wallet',
         ],
     ],
     'route' => [

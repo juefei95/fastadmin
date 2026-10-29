@@ -3,6 +3,7 @@
 /vendor/
 /runtime/*
 /addons/*
+!/addons/wallet
 /public/assets/libs/
 /public/assets/addons/*
 /public/uploads/*
