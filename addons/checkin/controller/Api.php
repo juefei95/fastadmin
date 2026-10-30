@@ -11,7 +11,7 @@ use think\Db;
 
 class Api extends BaseApi
 {
-    protected $noNeedLogin = ['login'];
+    protected $noNeedLogin = ['login', 'rewardconfig'];
     protected $noNeedRight = '*';
 
     public function login()
@@ -53,6 +53,22 @@ class Api extends BaseApi
         $this->success('', ['score' => Wallet::balance($this->auth->id)]);
     }
 
+    private function getRewardConfig()
+    {
+        $config = get_addon_config('checkin') ?: [];
+        $defaults = ['weekday_reward' => 1, 'weekend_reward' => 2, 'holiday_reward' => 3];
+        foreach ($defaults as $key => $default) {
+            $value = isset($config[$key]) ? (string)$config[$key] : '';
+            $defaults[$key] = ctype_digit($value) && (int)$value > 0 ? (int)$value : $default;
+        }
+        return $defaults;
+    }
+
+    public function rewardconfig()
+    {
+        $this->success('', $this->getRewardConfig());
+    }
+
     public function checkin()
     {
         if (!$this->request->isPost()) $this->error('请求方法错误');
@@ -61,7 +77,8 @@ class Api extends BaseApi
         $day = (int)date('N');
         $monthDay = date('m-d');
         $holiday = $monthDay === '01-01' || $monthDay === '05-01' || ($monthDay >= '10-01' && $monthDay <= '10-07');
-        $reward = $holiday ? 3 : ($day >= 6 ? 2 : 1);
+        $rewards = $this->getRewardConfig();
+        $reward = $holiday ? $rewards['holiday_reward'] : ($day >= 6 ? $rewards['weekend_reward'] : $rewards['weekday_reward']);
         // Reward is calculated by the server; a client-supplied amount is never trusted.
         try {
             $score = Db::transaction(function () use ($userId, $date, $reward) {
