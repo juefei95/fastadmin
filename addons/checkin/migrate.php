@@ -4,7 +4,10 @@ $root = dirname(__DIR__, 2);
 $db = parse_ini_file($root . '/.env', true)['database'];
 $pdo = new PDO('mysql:host=' . (getenv('DATABASE_HOSTNAME') ?: $db['hostname']) . ';port=' . (getenv('DATABASE_HOSTPORT') ?: $db['hostport']) . ';dbname=' . (getenv('DATABASE_DATABASE') ?: $db['database']) . ';charset=utf8mb4', getenv('DATABASE_USERNAME') ?: $db['username'], getenv('DATABASE_PASSWORD') ?: $db['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 $p = $db['prefix'];
-$users = $pdo->query('SELECT id,wechatopenid,nickname FROM `' . $p . 'user` WHERE wechatopenid IS NOT NULL AND wechatopenid<>""')->fetchAll(PDO::FETCH_ASSOC);
+$hasLegacyOpenid = $pdo->query('SHOW COLUMNS FROM `' . $p . 'user` LIKE "wechatopenid"')->fetch(PDO::FETCH_ASSOC) !== false;
+$users = $hasLegacyOpenid
+    ? $pdo->query('SELECT id,wechatopenid,nickname FROM `' . $p . 'user` WHERE wechatopenid IS NOT NULL AND wechatopenid<>""')->fetchAll(PDO::FETCH_ASSOC)
+    : [];
 echo count($users) . " old WeChat bindings.\n";
 if (!in_array('--apply', $argv, true)) { echo "Dry run. Pass --apply to copy.\n"; exit; }
 foreach (explode(';', str_replace('__PREFIX__', $p, file_get_contents(__DIR__ . '/install.sql'))) as $sql) if (trim($sql)) $pdo->exec($sql);

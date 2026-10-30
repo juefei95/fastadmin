@@ -38,19 +38,9 @@ class Api extends BaseApi
             if (!$user || $user->status !== 'normal') $this->error('账号不可用');
             $ok = $this->auth->direct($user->id);
         } else {
-            // During migration, an old account can still be linked without making a second user.
-            $legacy = \app\common\model\User::getByWechatopenid($openid);
-            if ($legacy) {
-                if ($legacy->status !== 'normal') $this->error('账号不可用');
-                try {
-                    Third::create(['user_id' => $legacy->id, 'platform' => 'wechat', 'apptype' => 'miniapp', 'openid' => $openid, 'unionid' => $session['unionid'] ?? '', 'openname' => $legacy->nickname], true);
-                } catch (\Throwable $e) {
-                    $this->error('微信身份绑定失败');
-                }
-                $ok = $this->auth->direct($legacy->id);
-            } else {
-                $ok = Service::connect('wechat', ['openid' => $openid, 'unionid' => $session['unionid'] ?? '', 'apptype' => 'miniapp']);
-            }
+            // Service creates a FastAdmin user and its fa_third binding for a new miniapp OpenID.
+            // Do not pass unionid here: Service otherwise reuses an unrelated WeChat app's binding.
+            $ok = Service::connect('wechat', ['openid' => $openid, 'apptype' => 'miniapp']);
         }
         if (!$ok) $this->error('微信登录失败');
         $userinfo = $this->auth->getUserinfo();
