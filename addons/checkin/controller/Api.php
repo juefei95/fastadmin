@@ -8,10 +8,11 @@ use app\common\controller\Api as BaseApi;
 use fast\Http;
 use think\Config;
 use think\Db;
+use think\Validate;
 
 class Api extends BaseApi
 {
-    protected $noNeedLogin = ['login', 'rewardconfig'];
+    protected $noNeedLogin = ['login', 'accountlogin', 'rewardconfig'];
     protected $noNeedRight = '*';
 
     public function login()
@@ -48,9 +49,54 @@ class Api extends BaseApi
         $this->success('登录成功', ['userinfo' => $userinfo]);
     }
 
+    public function accountlogin()
+    {
+        if (!$this->request->isPost()) $this->error('请求方法错误');
+        $account = trim((string)$this->request->post('account', ''));
+        $password = (string)$this->request->post('password', '');
+        if (!$account || !$password) $this->error('请输入用户名和密码');
+        if (!$this->auth->login($account, $password)) $this->error($this->auth->getError());
+        $userinfo = $this->auth->getUserinfo();
+        $userinfo['score'] = Wallet::balance($this->auth->id);
+        $this->success('登录成功', ['userinfo' => $userinfo]);
+    }
+
     public function wallet()
     {
         $this->success('', ['score' => Wallet::balance($this->auth->id)]);
+    }
+
+    public function changeusername()
+    {
+        if (!$this->request->isPost()) $this->error('请求方法错误');
+        $username = trim((string)$this->request->post('username', ''));
+        if (!preg_match('/^[0-9A-Za-z_]{3,30}$/', $username)) $this->error('用户名不可使用');
+        $user = $this->auth->getUser();
+        if (\app\common\model\User::where('username', $username)->where('id', '<>', $user->id)->find()) {
+            $this->error('用户名已存在');
+        }
+        if (preg_match('/^1\d{10}$/', $username)) {
+            if (\app\common\model\User::where('mobile', $username)->where('id', '<>', $user->id)->find()) {
+                $this->error('手机号已存在');
+            }
+            $user->mobile = $username;
+        }
+        $user->username = $username;
+        $user->save();
+        $this->success('修改用户名成功');
+    }
+
+    public function changepwdwithoutold()
+    {
+        if (!$this->request->isPost()) $this->error('请求方法错误');
+        $newpassword = (string)$this->request->post('newpassword', '');
+        $repassword = (string)$this->request->post('repassword', '');
+        if ($newpassword !== $repassword) $this->error('两次密码输入不一致');
+        if (!Validate::make()->check(['newpassword' => $newpassword], ['newpassword' => 'require|regex:\S{6,30}'])) {
+            $this->error('密码须为6至30位非空白字符');
+        }
+        if (!$this->auth->changepwd($newpassword, '', true)) $this->error($this->auth->getError());
+        $this->success('修改密码成功');
     }
 
     private function getRewardConfig()
