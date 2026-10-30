@@ -27,6 +27,7 @@ return [
         ],
         'user_register_successed' => [
             'wallet',
+            'checkin',
         ],
     ],
     'route' => [
