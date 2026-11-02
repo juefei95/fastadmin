@@ -3,6 +3,17 @@
 return [
     'autoload' => false,
     'hooks' => [
+        'user_register_successed' => [
+            'checkin',
+            'wallet',
+        ],
+        'app_init' => [
+            'legacycheckin',
+            'wallet',
+        ],
+        'app_dispatch' => [
+            'legacycheckin',
+        ],
         'user_delete_successed' => [
             'third',
             'wallet',
@@ -21,13 +32,6 @@ return [
         ],
         'view_filter' => [
             'third',
-        ],
-        'app_init' => [
-            'wallet',
-        ],
-        'user_register_successed' => [
-            'wallet',
-            'checkin',
         ],
     ],
     'route' => [
