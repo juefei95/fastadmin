@@ -2,6 +2,7 @@
 namespace addons\checkin\controller;
 
 use addons\wallet\library\Wallet;
+use addons\checkin\library\SpringFestival;
 use addons\third\library\Service;
 use addons\third\model\Third;
 use app\common\controller\Api as BaseApi;
@@ -115,6 +116,18 @@ class Api extends BaseApi
         $this->success('', $this->getRewardConfig());
     }
 
+    public function checkinstatus()
+    {
+        $date = date('Y-m-d');
+        $record = Db::name('checkin_daily')->where('user_id', $this->auth->id)->where('check_date', $date)->find();
+        $this->success('', [
+            'date' => $date,
+            'checked' => (bool)$record,
+            'reward' => $record ? (int)$record['reward'] : 0,
+            'score' => Wallet::balance($this->auth->id),
+        ]);
+    }
+
     public function checkin()
     {
         if (!$this->request->isPost()) $this->error('请求方法错误');
@@ -122,7 +135,7 @@ class Api extends BaseApi
         $date = date('Y-m-d');
         $day = (int)date('N');
         $monthDay = date('m-d');
-        $holiday = $monthDay === '01-01' || $monthDay === '05-01' || ($monthDay >= '10-01' && $monthDay <= '10-07');
+        $holiday = $monthDay === '01-01' || $monthDay === '05-01' || ($monthDay >= '10-01' && $monthDay <= '10-07') || SpringFestival::contains($date);
         $rewards = $this->getRewardConfig();
         $reward = $holiday ? $rewards['holiday_reward'] : ($day >= 6 ? $rewards['weekend_reward'] : $rewards['weekday_reward']);
         // Reward is calculated by the server; a client-supplied amount is never trusted.
