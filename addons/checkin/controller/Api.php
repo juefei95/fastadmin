@@ -3,6 +3,7 @@ namespace addons\checkin\controller;
 
 use addons\wallet\library\Wallet;
 use addons\checkin\library\SpringFestival;
+use addons\checkin\library\RewardService;
 use addons\third\library\Service;
 use addons\third\model\Third;
 use app\common\controller\Api as BaseApi;
@@ -15,6 +16,14 @@ class Api extends BaseApi
 {
     protected $noNeedLogin = ['login', 'accountlogin', 'rewardconfig'];
     protected $noNeedRight = '*';
+
+    private function miniappUserId()
+    {
+        if (!Third::where('user_id', $this->auth->id)->where('platform', 'wechat')->where('apptype', 'miniapp')->find()) {
+            $this->error('请使用新小程序登录');
+        }
+        return (int)$this->auth->id;
+    }
 
     public function login()
     {
@@ -118,6 +127,7 @@ class Api extends BaseApi
 
     public function checkinstatus()
     {
+        $this->miniappUserId();
         $date = date('Y-m-d');
         $record = Db::name('checkin_daily')->where('user_id', $this->auth->id)->where('check_date', $date)->find();
         $this->success('', [
@@ -131,7 +141,7 @@ class Api extends BaseApi
     public function checkin()
     {
         if (!$this->request->isPost()) $this->error('请求方法错误');
-        $userId = $this->auth->id;
+        $userId = $this->miniappUserId();
         $date = date('Y-m-d');
         $day = (int)date('N');
         $monthDay = date('m-d');
@@ -140,28 +150,44 @@ class Api extends BaseApi
         $reward = $holiday ? $rewards['holiday_reward'] : ($day >= 6 ? $rewards['weekend_reward'] : $rewards['weekday_reward']);
         // Reward is calculated by the server; a client-supplied amount is never trusted.
         try {
-            $score = Db::transaction(function () use ($userId, $date, $reward) {
-                Db::name('checkin_daily')->insert(['user_id' => $userId, 'check_date' => $date, 'reward' => $reward, 'createtime' => time()]);
-                return Wallet::change($userId, $reward, 'checkin', '每日签到');
-            });
+            $score = RewardService::checkin($userId, $reward);
         } catch (\Throwable $e) {
-            if (Db::name('checkin_daily')->where('user_id', $userId)->where('check_date', $date)->find()) $this->error('今日已签到');
+            if (RewardService::checkedToday($userId)) $this->error('今日已签到');
             $this->error('签到失败');
         }
         $this->success('签到成功', ['score' => $score, 'reward' => $reward]);
     }
 
+    public function todayrewards()
+    {
+        if (!$this->request->isPost()) $this->error('请求方法错误');
+        $this->success('', RewardService::todayRewards($this->miniappUserId()));
+    }
+
+    public function adreward()
+    {
+        if (!$this->request->isPost()) $this->error('请求方法错误');
+        $userId = $this->miniappUserId();
+        try {
+            $score = RewardService::adReward($userId, (int)$this->request->post('addscorenum', 0));
+        } catch (\InvalidArgumentException $e) { $this->error($e->getMessage()); }
+        $this->success('奖励发放成功', ['score' => $score]);
+    }
+
+    public function claiminvitation()
+    {
+        if (!$this->request->isPost()) $this->error('请求方法错误');
+        try {
+            $awarded = RewardService::claimInvitation($this->miniappUserId(), (int)$this->request->post('inviter_id', 0));
+        } catch (\InvalidArgumentException $e) { $this->error($e->getMessage()); }
+        $this->success('', ['awarded' => $awarded]);
+    }
+
     public function virtuallocation()
     {
         if (!$this->request->isPost()) $this->error('请求方法错误');
-        $userId = $this->auth->id;
         try {
-            $result = Db::transaction(function () use ($userId) {
-                Db::name('wallet_account')->where('user_id', $userId)->where('currency', 'coin')->lock(true)->find();
-                $recent = Db::name('wallet_ledger')->where('user_id', $userId)->where('currency', 'coin')->where('type', 'virtual_location')->where('createtime', '>=', time() - 10800)->order('id', 'desc')->find();
-                if ($recent) return ['score' => Wallet::balance($userId), 'deducted' => 0];
-                return ['score' => Wallet::change($userId, -2, 'virtual_location', '虚拟定位'), 'deducted' => 2];
-            });
+            $result = RewardService::virtualLocation($this->miniappUserId());
         } catch (\Throwable $e) { $this->error($e->getMessage() === '余额不足' ? '金币不足' : '扣费失败'); }
         $this->success('操作成功', $result);
     }

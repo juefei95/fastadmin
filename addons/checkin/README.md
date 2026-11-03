@@ -1,5 +1,7 @@
 # 打卡插件
 
+分享与广告奖励：`POST /addons/checkin/api/todayrewards` 返回今天的签到、广告和邀请奖励；`POST /addons/checkin/api/adreward` 发放广告奖励；`POST /addons/checkin/api/claiminvitation` 为首次受邀会员给邀请者发放 5 金币。这些逻辑由 `library/RewardService.php` 统一实现，旧接口插件只调用此服务并适配旧响应。
+
 依赖 `wallet` 和 `third` 插件。微信小程序登录通过微信 `code` 获取 OpenID，以 `fa_third` 中的 `platform=wechat`、`apptype=miniapp` 绑定 FastAdmin 会员；首次登录由 `third` 插件创建会员及绑定，后续登录复用绑定。无需在 `fa_user` 增加 `wechatopenid` 字段。金币由钱包插件管理。配置页可设置微信小程序 AppID 与 AppSecret，未设置时兼容原站点配置。新会员初始金币也可在插件配置页设置，默认 0，仅在新会员注册时发放到钱包并记录流水，不改变已有会员余额。
 
 接口：`POST /addons/checkin/api/login` 传微信 `code`；`POST /addons/checkin/api/accountlogin` 用用户名和密码重新登录；`POST /addons/checkin/api/changeusername`、`POST /addons/checkin/api/changepwdwithoutold` 用于已登录会员设置账号和密码；`POST /addons/checkin/api/checkin` 每天一次；`GET /addons/checkin/api/checkinstatus` 返回当前会员今天的签到奖励和钱包余额，供多设备同步；`GET /addons/checkin/api/rewardconfig` 返回三档签到奖励，供小程序展示；`POST /addons/checkin/api/virtuallocation` 扣 2 金币、3 小时内不重复扣。签到奖励在插件配置页分别设置工作日、周末和指定节日的金币数。指定节日为元旦、农历正月初一至初七、劳动节当天及国庆 1 至 7 日，优先于周末；实际发放由服务端按同一配置计算，客户端传来的奖励数不参与计算。春节日期使用香港天文台公历农历对照表生成的 2026–2100 年离线数据；更新数据可运行 `addons/checkin/tools/generate_spring_festival_dates.ps1`。

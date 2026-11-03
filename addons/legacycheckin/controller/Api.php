@@ -4,10 +4,10 @@ namespace addons\legacycheckin\controller;
 use addons\third\library\Service;
 use addons\third\model\Third;
 use addons\wallet\library\Wallet;
+use addons\checkin\library\RewardService;
 use app\common\controller\Api as BaseApi;
 use app\common\model\User;
 use fast\Http;
-use think\Db;
 
 class Api extends BaseApi
 {
@@ -89,16 +89,13 @@ class Api extends BaseApi
     {
         if (!$this->request->isPost()) $this->error('请求方法错误');
         $userId = $this->legacyUserId();
-        $date = date('Y-m-d');
         $reward = (int)$this->request->post('addscorenum', 0);
-        if ($reward < 1 || $reward > 10) $this->error('签到奖励无效');
         try {
-            $score = Db::transaction(function () use ($userId, $date, $reward) {
-                Db::name('legacy_checkin_daily')->insert(['user_id' => $userId, 'check_date' => $date, 'reward' => $reward, 'createtime' => time()]);
-                return Wallet::change($userId, $reward, 'legacy_checkin', '每日签到');
-            });
+            $score = RewardService::checkin($userId, $reward, true);
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
         } catch (\Throwable $e) {
-            if (Db::name('legacy_checkin_daily')->where('user_id', $userId)->where('check_date', $date)->find()) $this->error('今日已签到');
+            if (RewardService::checkedToday($userId, true)) $this->error('今日已签到');
             $this->error('签到失败');
         }
         $this->success('签到成功', ['score' => $score]);
@@ -106,12 +103,7 @@ class Api extends BaseApi
 
     public function todayrewards()
     {
-        $userId = $this->legacyUserId();
-        $start = strtotime('today');
-        $checkin = (int)Db::name('legacy_checkin_daily')->where('user_id', $userId)->where('check_date', date('Y-m-d'))->sum('reward');
-        $ad = (int)Db::name('wallet_ledger')->where('user_id', $userId)->where('type', 'legacy_ad')->where('createtime', '>=', $start)->sum('amount');
-        $share = (int)Db::name('wallet_ledger')->where('user_id', $userId)->where('type', 'legacy_invite')->where('createtime', '>=', $start)->sum('amount');
-        $this->success('', ['checkin' => $checkin, 'ad' => $ad, 'share' => $share, 'total' => $checkin + $ad + $share, 'score' => Wallet::balance($userId)]);
+        $this->success('', RewardService::todayRewards($this->legacyUserId(), true));
     }
 
     public function adreward()
@@ -119,38 +111,26 @@ class Api extends BaseApi
         if (!$this->request->isPost()) $this->error('请求方法错误');
         $userId = $this->legacyUserId();
         $amount = (int)$this->request->post('addscorenum', 0);
-        if ($amount < 1 || $amount > 10) $this->error('广告奖励无效');
-        $score = Db::transaction(function () use ($userId, $amount) { return Wallet::change($userId, $amount, 'legacy_ad', '观看视频广告'); });
+        try {
+            $score = RewardService::adReward($userId, $amount, true);
+        } catch (\InvalidArgumentException $e) { $this->error($e->getMessage()); }
         $this->success('奖励发放成功', ['score' => $score]);
     }
 
     public function claiminvitation()
     {
         if (!$this->request->isPost()) $this->error('请求方法错误');
-        $visitorId = $this->legacyUserId();
-        $inviterId = (int)$this->request->post('inviter_id', 0);
-        if ($inviterId <= 0 || $inviterId === $visitorId) $this->error('无效的邀请');
-        $awarded = Db::transaction(function () use ($visitorId, $inviterId) {
-            if (!User::get($inviterId) || !Third::where('user_id', $inviterId)->where('platform', 'wechat_legacy')->find()) return false;
-            Db::name('user')->where('id', $visitorId)->lock(true)->find();
-            if (Db::name('wallet_ledger')->where('type', 'legacy_invite')->where('source_type', 'legacy_invite')->where('source_id', $visitorId)->find()) return false;
-            Wallet::change($inviterId, 5, 'legacy_invite', '邀请好友:' . $visitorId, 'coin', 'legacy_invite', $visitorId);
-            return true;
-        });
+        try {
+            $awarded = RewardService::claimInvitation($this->legacyUserId(), (int)$this->request->post('inviter_id', 0), true);
+        } catch (\InvalidArgumentException $e) { $this->error($e->getMessage()); }
         $this->success('', ['awarded' => $awarded]);
     }
 
     public function virtuallocation()
     {
         if (!$this->request->isPost()) $this->error('请求方法错误');
-        $userId = $this->legacyUserId();
         try {
-            $result = Db::transaction(function () use ($userId) {
-                Db::name('wallet_account')->where('user_id', $userId)->where('currency', 'coin')->lock(true)->find();
-                $recent = Db::name('wallet_ledger')->where('user_id', $userId)->where('type', 'legacy_virtual')->where('createtime', '>=', time() - 10800)->find();
-                if ($recent) return ['score' => Wallet::balance($userId), 'deducted' => 0];
-                return ['score' => Wallet::change($userId, -2, 'legacy_virtual', '虚拟定位'), 'deducted' => 2];
-            });
+            $result = RewardService::virtualLocation($this->legacyUserId(), true);
         } catch (\Throwable $e) { $this->error('虚拟定位失败：' . ($e->getMessage() === '余额不足' ? '当前金币不足2个，请先获得金币' : '系统异常')); }
         $this->success('虚拟定位成功', $result);
     }
