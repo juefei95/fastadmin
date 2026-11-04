@@ -7,6 +7,16 @@ return [
             'checkin',
             'wallet',
         ],
+        'epay_config_init' => [
+            'epay',
+        ],
+        'addon_action_begin' => [
+            'epay',
+        ],
+        'action_begin' => [
+            'epay',
+            'third',
+        ],
         'app_init' => [
             'legacycheckin',
             'wallet',
@@ -22,9 +32,6 @@ return [
             'third',
         ],
         'module_init' => [
-            'third',
-        ],
-        'action_begin' => [
             'third',
         ],
         'config_init' => [
