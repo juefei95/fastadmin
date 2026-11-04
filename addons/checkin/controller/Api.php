@@ -14,7 +14,7 @@ use think\Validate;
 
 class Api extends BaseApi
 {
-    protected $noNeedLogin = ['login', 'accountlogin', 'rewardconfig'];
+    protected $noNeedLogin = ['login', 'accountlogin', 'rewardconfig', 'rechargepackages'];
     protected $noNeedRight = '*';
 
     private function miniappUserId()
@@ -22,7 +22,13 @@ class Api extends BaseApi
         if (!Third::where('user_id', $this->auth->id)->where('platform', 'wechat')->where('apptype', 'miniapp')->find()) {
             $this->error('请使用新小程序登录');
         }
+        $this->ensureCheckinUser((int)$this->auth->id);
         return (int)$this->auth->id;
+    }
+
+    private function ensureCheckinUser($userId)
+    {
+        Db::execute('INSERT IGNORE INTO `' . config('database.prefix') . 'checkin_user` (`user_id`, `createtime`) VALUES (?, ?)', [$userId, time()]);
     }
 
     public function login()
@@ -54,6 +60,7 @@ class Api extends BaseApi
             $ok = Service::connect('wechat', ['openid' => $openid, 'apptype' => 'miniapp']);
         }
         if (!$ok) $this->error('微信登录失败');
+        $this->ensureCheckinUser((int)$this->auth->id);
         $userinfo = $this->auth->getUserinfo();
         $userinfo['score'] = Wallet::balance($this->auth->id);
         $this->success('登录成功', ['userinfo' => $userinfo]);
@@ -66,6 +73,9 @@ class Api extends BaseApi
         $password = (string)$this->request->post('password', '');
         if (!$account || !$password) $this->error('请输入用户名和密码');
         if (!$this->auth->login($account, $password)) $this->error($this->auth->getError());
+        if (Third::where('user_id', $this->auth->id)->where('platform', 'wechat')->where('apptype', 'miniapp')->find()) {
+            $this->ensureCheckinUser((int)$this->auth->id);
+        }
         $userinfo = $this->auth->getUserinfo();
         $userinfo['score'] = Wallet::balance($this->auth->id);
         $this->success('登录成功', ['userinfo' => $userinfo]);
@@ -74,6 +84,13 @@ class Api extends BaseApi
     public function wallet()
     {
         $this->success('', ['score' => Wallet::balance($this->auth->id)]);
+    }
+
+    public function rechargepackages()
+    {
+        $rows = Db::name('checkin_recharge_package')->where('enabled', 1)
+            ->field('id,name,description,recommended,coins,price_fen,original_price_fen')->order('weigh asc,id asc')->select();
+        $this->success('', ['packages' => $rows]);
     }
 
     public function changeusername()

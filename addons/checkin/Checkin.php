@@ -3,6 +3,8 @@ namespace addons\checkin;
 
 use think\Addons;
 use addons\wallet\library\Wallet;
+use app\common\library\Menu;
+use app\admin\model\AuthRule;
 
 class Checkin extends Addons
 {
@@ -16,8 +18,36 @@ class Checkin extends Addons
         }
     }
 
-    public function install() { return true; }
-    public function uninstall() { return true; }
-    public function enable() { return true; }
-    public function disable() { return true; }
+    public function install() { Menu::create(self::menu()); return true; }
+    public function uninstall() { Menu::delete('checkin'); return true; }
+    public function enable()
+    {
+        if (!AuthRule::getByName('checkin')) {
+            Menu::create(self::menu());
+        } else {
+            $missing = [];
+            foreach ([['name' => 'checkin/user/index', 'title' => '打卡用户', 'ismenu' => 1], ['name' => 'checkin/recharge/createpackage', 'title' => '添加套餐', 'ismenu' => 0], ['name' => 'checkin/recharge/deletepackage', 'title' => '删除套餐', 'ismenu' => 0]] as $rule) {
+                if (!AuthRule::getByName($rule['name'])) $missing[] = $rule;
+            }
+            if ($missing) { Menu::create($missing, 'checkin'); Menu::refresh('checkin'); }
+        }
+        Menu::enable('checkin');
+        return true;
+    }
+    public function disable() { Menu::disable('checkin'); return true; }
+
+    private static function menu()
+    {
+        return [[
+            'name' => 'checkin', 'title' => '打卡管理', 'icon' => 'fa fa-calendar',
+            'sublist' => [
+                ['name' => 'checkin/user/index', 'title' => '打卡用户', 'ismenu' => 1],
+                ['name' => 'checkin/recharge/index', 'title' => '充值套餐', 'ismenu' => 1],
+                ['name' => 'checkin/recharge/orders', 'title' => '充值订单', 'ismenu' => 1],
+                ['name' => 'checkin/recharge/edit', 'title' => '编辑套餐', 'ismenu' => 0],
+                ['name' => 'checkin/recharge/createpackage', 'title' => '添加套餐', 'ismenu' => 0],
+                ['name' => 'checkin/recharge/deletepackage', 'title' => '删除套餐', 'ismenu' => 0],
+            ],
+        ]];
+    }
 }
