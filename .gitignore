@@ -17,3 +17,6 @@ composer.lock
 .vscode
 node_modules
 .user.ini
+
+!/addons/pawnightmarket/
+!/public/assets/addons/pawnightmarket/
