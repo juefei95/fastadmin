@@ -40,9 +40,11 @@ class Checkin extends Addons
     public function uninstall() { Menu::delete('checkin'); return true; }
     public function enable()
     {
-        if (!AuthRule::getByName('checkin')) {
+        $root = AuthRule::getByName('checkin');
+        if (!$root) {
             Menu::create(self::menu());
         } else {
+            if (($root['title'] ?? '') === '打卡管理') $root->save(['title' => '打卡签到管理']);
             $missing = [];
             foreach ([['name' => 'checkin/user/index', 'title' => '打卡用户', 'ismenu' => 1], ['name' => 'checkin/recharge/createpackage', 'title' => '添加套餐', 'ismenu' => 0], ['name' => 'checkin/recharge/deletepackage', 'title' => '删除套餐', 'ismenu' => 0], self::configMenu()] as $rule) {
                 if (!AuthRule::getByName($rule['name'])) $missing[] = $rule;
@@ -57,7 +59,7 @@ class Checkin extends Addons
     private static function menu()
     {
         return [[
-            'name' => 'checkin', 'title' => '打卡管理', 'icon' => 'fa fa-calendar',
+            'name' => 'checkin', 'title' => '打卡签到管理', 'icon' => 'fa fa-calendar',
             'sublist' => [
                 ['name' => 'checkin/user/index', 'title' => '打卡用户', 'ismenu' => 1],
                 ['name' => 'checkin/recharge/index', 'title' => '充值套餐', 'ismenu' => 1],

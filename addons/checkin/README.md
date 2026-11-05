@@ -1,6 +1,6 @@
 # 打卡插件
 
-打卡用户：仅新版小程序绑定的会员会加入 `checkin_user`；首次新版微信登录或使用打卡业务时自动建立关系，后台“打卡管理 → 打卡用户”可查询。共用会员状态不等于独立的打卡服务封禁状态。已安装的插件请先运行 `php addons/checkin/migrate_checkin_users.php` 预览已有绑定数量，再运行 `php addons/checkin/migrate_checkin_users.php --apply` 创建表并补录，重复执行不会覆盖已有关系。更新插件时需同步后台控制器和视图，重新启用插件补充菜单；加入时间对历史用户使用第三方绑定创建时间。
+打卡用户：仅新版小程序绑定的会员会加入 `checkin_user`；首次新版微信登录或使用打卡业务时自动建立关系，后台“打卡签到管理 → 打卡用户”可查询。共用会员状态不等于独立的打卡服务封禁状态。已安装的插件请先运行 `php addons/checkin/migrate_checkin_users.php` 预览已有绑定数量，再运行 `php addons/checkin/migrate_checkin_users.php --apply` 创建表并补录，重复执行不会覆盖已有关系。更新插件时需同步后台控制器和视图，重新启用插件补充菜单；加入时间对历史用户使用第三方绑定创建时间。
 
 会员通过后台或会员接口删除后会同步移除打卡用户关系；签到及充值历史不在此处删除。启用更新后的插件以刷新钩子。历史孤立关系可用 `php addons/checkin/cleanup_orphan_users.php` 预览，确认后添加 `--apply` 清理。
 

@@ -44,9 +44,12 @@ class Legacycheckin extends Addons
     {
         $root = AuthRule::getByName('legacycheckin');
         if (!$root) {
-            Menu::create([['name' => 'legacycheckin', 'title' => '旧版打卡管理', 'icon' => 'fa fa-history', 'ismenu' => 1]]);
-        } elseif (!(int)$root['ismenu']) {
-            $root->save(['ismenu' => 1]);
+            Menu::create([['name' => 'legacycheckin', 'title' => '旧版打卡签到管理', 'icon' => 'fa fa-history', 'ismenu' => 1]]);
+        } else {
+            $changes = [];
+            if (!(int)$root['ismenu']) $changes['ismenu'] = 1;
+            if ($root['title'] === '旧版打卡管理') $changes['title'] = '旧版打卡签到管理';
+            if ($changes) $root->save($changes);
         }
         if (!AuthRule::getByName('legacycheckin/user/index')) {
             Menu::create([['name' => 'legacycheckin/user/index', 'title' => '旧版打卡用户', 'ismenu' => 1]], 'legacycheckin');
