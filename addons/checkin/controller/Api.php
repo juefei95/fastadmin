@@ -283,8 +283,11 @@ class Api extends BaseApi
     public function virtuallocation()
     {
         if (!$this->request->isPost()) $this->error('请求方法错误');
+        $userId = $this->rechargeUserId();
+        $isNewUser = (bool)Third::where('user_id', $userId)->where('platform', 'wechat')->where('apptype', 'miniapp')->find();
+        if ($isNewUser) $this->ensureCheckinUser($userId);
         try {
-            $result = RewardService::virtualLocation($this->miniappUserId());
+            $result = RewardService::virtualLocation($userId, !$isNewUser);
         } catch (\Throwable $e) { $this->error($e->getMessage() === '余额不足' ? '金币不足' : '扣费失败'); }
         $this->success('操作成功', $result);
     }
