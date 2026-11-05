@@ -31,6 +31,15 @@ class Api extends BaseApi
         Db::execute('INSERT IGNORE INTO `' . config('database.prefix') . 'checkin_user` (`user_id`, `createtime`) VALUES (?, ?)', [$userId, time()]);
     }
 
+    private function rechargeUserId()
+    {
+        $id = (int)$this->auth->id;
+        foreach (['wechat', 'wechat_legacy'] as $platform) {
+            if (Third::where('user_id', $id)->where('platform', $platform)->where('apptype', 'miniapp')->find()) return $id;
+        }
+        $this->error('请使用打卡小程序绑定的账号登录');
+    }
+
     public function login()
     {
         $code = trim((string)$this->request->post('code', ''));
@@ -96,12 +105,13 @@ class Api extends BaseApi
     public function createrechargeorder()
     {
         if (!$this->request->isPost()) $this->error('请求方法错误');
-        $userId = $this->miniappUserId();
+        $userId = $this->rechargeUserId();
         $packageId = (int)$this->request->post('package_id', 0);
         $config = get_addon_config('checkin') ?: [];
         $epay = get_addon_config('epay') ?: [];
         $wechat = $epay['wechat'] ?? [];
         $appid = trim((string)($config['payment_appid'] ?? ''));
+        if ($appid === '') $appid = trim((string)($wechat['app_id'] ?? ''));
         $notify = trim((string)($config['payment_notify_url'] ?? ''));
         $parts = parse_url($notify);
         if ((string)($config['payment_wechat_enabled'] ?? '0') !== '1') $this->error('微信支付未开放');
