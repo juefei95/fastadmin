@@ -27,5 +27,11 @@ foreach (explode(';', str_replace('__PREFIX__', $prefix, file_get_contents(__DIR
     if ($packageTableExists && preg_match('/^\s*INSERT\s+IGNORE\s+INTO\s+`' . preg_quote($table, '/') . '`/i', $sql)) continue;
     if (trim($sql)) $pdo->exec($sql);
 }
+$orderTable = $prefix . 'checkin_recharge_order';
+$column = $pdo->prepare('SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name=? AND column_name=?');
+foreach (['payment_appid' => "varchar(64) NOT NULL DEFAULT ''", 'merchant_id' => "varchar(32) NOT NULL DEFAULT ''"] as $name => $definition) {
+    $column->execute([$orderTable, $name]);
+    if (!$column->fetchColumn()) $pdo->exec("ALTER TABLE `{$orderTable}` ADD COLUMN `{$name}` {$definition}");
+}
 $pdo->exec("UPDATE `{$table}` SET name = CASE id WHEN 1 THEN '轻享套餐' WHEN 2 THEN '畅享套餐' WHEN 3 THEN '尊享套餐' ELSE CONCAT('套餐 ',id) END WHERE name = ''");
 echo "Checkin schema initialized. Existing package rows were preserved.\n";

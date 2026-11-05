@@ -34,6 +34,9 @@ namespace {
         $plugin->disable();
         $plugin->enable();
         if (empty(\app\common\library\Menu::$rules['checkin/user/index'])) throw new \RuntimeException('missing user menu');
+        unset(\app\common\library\Menu::$rules['checkin/config']);
+        $plugin->enable();
+        if (empty(\app\common\library\Menu::$rules['checkin/config'])) throw new \RuntimeException('missing config menu');
         foreach (\app\common\library\Menu::$rules as $enabled) if (!$enabled) throw new \RuntimeException('menu remained disabled');
         $plugin->disable();
         $plugin->enable();

@@ -93,6 +93,76 @@ class Api extends BaseApi
         $this->success('', ['packages' => $rows]);
     }
 
+    public function createrechargeorder()
+    {
+        if (!$this->request->isPost()) $this->error('请求方法错误');
+        $userId = $this->miniappUserId();
+        $packageId = (int)$this->request->post('package_id', 0);
+        $config = get_addon_config('checkin') ?: [];
+        $epay = get_addon_config('epay') ?: [];
+        $wechat = $epay['wechat'] ?? [];
+        $appid = trim((string)($config['payment_appid'] ?? ''));
+        $notify = trim((string)($config['payment_notify_url'] ?? ''));
+        $parts = parse_url($notify);
+        if ((string)($config['payment_wechat_enabled'] ?? '0') !== '1') $this->error('微信支付未开放');
+        if ($packageId < 1) $this->error('请选择有效套餐');
+        if (!preg_match('/^wx[a-zA-Z0-9]{16}$/D', $appid) || empty($wechat['mch_id']) || ($wechat['mode'] ?? 'normal') !== 'normal'
+            || !is_array($parts) || ($parts['scheme'] ?? '') !== 'https' || empty($parts['host'])
+            || ($parts['path'] ?? '') !== '/addons/checkin/payment/wechatnotify'
+            || isset($parts['query']) || isset($parts['fragment']) || isset($parts['user']) || isset($parts['pass'])) {
+            $this->error('微信支付配置不完整');
+        }
+        $plugin = get_addon_instance('epay');
+        if (!$plugin || !(get_addon_info('epay')['state'] ?? false) || !function_exists('bcmul')) $this->error('支付服务不可用');
+        $version = \addons\epay\library\Service::getSdkVersion();
+        if (!in_array($version, ['v2', 'v3'], true)) $this->error('支付服务不可用');
+        try {
+            $order = Db::transaction(function () use ($packageId, $userId, $appid, $wechat) {
+                $package = Db::name('checkin_recharge_package')->where('id', $packageId)->lock(true)->find();
+                if (!$package || (int)$package['enabled'] !== 1 || (int)$package['price_fen'] < 1 || (int)$package['coins'] < 1) {
+                    throw new \InvalidArgumentException('套餐不可用');
+                }
+                $order = ['order_no' => 'C' . date('YmdHis') . bin2hex(random_bytes(8)), 'user_id' => $userId,
+                    'package_id' => $packageId, 'coins' => (int)$package['coins'], 'price_fen' => (int)$package['price_fen'],
+                    'pay_type' => 'wechat', 'payment_appid' => $appid, 'merchant_id' => (string)$wechat['mch_id'],
+                    'status' => 'pending', 'createtime' => time()];
+                Db::name('checkin_recharge_order')->insert($order);
+                return $order;
+            });
+        } catch (\InvalidArgumentException $e) { $this->error($e->getMessage()); }
+        catch (\Throwable $e) { \think\Log::record('checkin recharge order creation failed: ' . get_class($e), 'error'); $this->error('订单创建失败，请稍后重试'); }
+
+        try {
+            $plugin->epayConfigInit();
+            $amount = sprintf('%d.%02d', intdiv($order['price_fen'], 100), $order['price_fen'] % 100);
+            $custom = $version === 'v3' ? ['mp_app_id' => $appid] : ['app_id' => $appid];
+            $result = \addons\epay\library\Service::submitOrder($amount, $order['order_no'], 'wechat', '打卡金币充值', $notify, null, 'scan', '', $custom);
+            if (is_object($result) && method_exists($result, 'all')) $resultData = $result->all();
+            elseif (is_object($result) && method_exists($result, 'getContent')) $resultData = json_decode((string)$result->getContent(), true);
+            else $resultData = null;
+            if (!is_array($resultData)) throw new \RuntimeException('Invalid payment parameters');
+            $codeUrl = (string)($resultData['code_url'] ?? '');
+            $url = parse_url($codeUrl);
+            if (!is_array($url) || ($url['scheme'] ?? '') !== 'weixin' || ($url['host'] ?? '') !== 'wxpay') throw new \RuntimeException('Payment QR unavailable');
+        } catch (\Throwable $e) {
+            // A timeout may still have created a provider order: keep the local order pending for reconciliation.
+            \think\Log::record('checkin recharge payment initiation failed: ' . get_class($e), 'error');
+            $this->error('支付下单未完成，请稍后重试', ['order_no' => $order['order_no']]);
+        }
+        $this->success('订单创建成功', ['order_no' => $order['order_no'], 'coins' => $order['coins'], 'price_fen' => $order['price_fen'], 'code_url' => $codeUrl]);
+    }
+
+    public function rechargeorder()
+    {
+        $orderNo = trim((string)$this->request->get('order_no', ''));
+        if (!preg_match('/^[A-Za-z0-9_-]{1,64}$/D', $orderNo)) $this->error('订单号无效');
+        $order = Db::name('checkin_recharge_order')->where('user_id', $this->auth->id)->where('order_no', $orderNo)
+            ->field('order_no,coins,price_fen,pay_type,status,createtime,paidtime')->find();
+        if (!$order) $this->error('订单不存在');
+        $order['score'] = Wallet::balance($this->auth->id);
+        $this->success('', $order);
+    }
+
     public function changeusername()
     {
         if (!$this->request->isPost()) $this->error('请求方法错误');

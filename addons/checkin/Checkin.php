@@ -5,9 +5,27 @@ use think\Addons;
 use addons\wallet\library\Wallet;
 use app\common\library\Menu;
 use app\admin\model\AuthRule;
+use think\Db;
 
 class Checkin extends Addons
 {
+    public function appInit()
+    {
+        foreach ([\app\common\model\User::class, \app\admin\model\User::class] as $userModel) {
+            $userModel::event('after_delete', function ($user) { self::deleteCheckinUser($user->id); });
+        }
+    }
+
+    public function userDeleteSuccessed(\app\common\model\User $user)
+    {
+        self::deleteCheckinUser($user->id);
+    }
+
+    private static function deleteCheckinUser($userId)
+    {
+        if ((int)$userId > 0) Db::name('checkin_user')->where('user_id', (int)$userId)->delete();
+    }
+
     public function userRegisterSuccessed(\app\common\model\User $user)
     {
         $config = get_addon_config('checkin') ?: [];
@@ -26,7 +44,7 @@ class Checkin extends Addons
             Menu::create(self::menu());
         } else {
             $missing = [];
-            foreach ([['name' => 'checkin/user/index', 'title' => '打卡用户', 'ismenu' => 1], ['name' => 'checkin/recharge/createpackage', 'title' => '添加套餐', 'ismenu' => 0], ['name' => 'checkin/recharge/deletepackage', 'title' => '删除套餐', 'ismenu' => 0]] as $rule) {
+            foreach ([['name' => 'checkin/user/index', 'title' => '打卡用户', 'ismenu' => 1], ['name' => 'checkin/recharge/createpackage', 'title' => '添加套餐', 'ismenu' => 0], ['name' => 'checkin/recharge/deletepackage', 'title' => '删除套餐', 'ismenu' => 0], self::configMenu()] as $rule) {
                 if (!AuthRule::getByName($rule['name'])) $missing[] = $rule;
             }
             if ($missing) { Menu::create($missing, 'checkin'); Menu::refresh('checkin'); }
@@ -47,7 +65,13 @@ class Checkin extends Addons
                 ['name' => 'checkin/recharge/edit', 'title' => '编辑套餐', 'ismenu' => 0],
                 ['name' => 'checkin/recharge/createpackage', 'title' => '添加套餐', 'ismenu' => 0],
                 ['name' => 'checkin/recharge/deletepackage', 'title' => '删除套餐', 'ismenu' => 0],
+                self::configMenu(),
             ],
         ]];
+    }
+
+    private static function configMenu()
+    {
+        return ['name' => 'checkin/config', 'title' => '插件配置', 'icon' => 'fa fa-cog', 'url' => 'addon/config?name=checkin', 'menutype' => 'dialog', 'ismenu' => 1];
     }
 }

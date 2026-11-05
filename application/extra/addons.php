@@ -3,6 +3,16 @@
 return [
     'autoload' => false,
     'hooks' => [
+        'app_init' => [
+            'checkin',
+            'legacycheckin',
+            'wallet',
+        ],
+        'user_delete_successed' => [
+            'checkin',
+            'third',
+            'wallet',
+        ],
         'user_register_successed' => [
             'checkin',
             'wallet',
@@ -17,16 +27,8 @@ return [
             'epay',
             'third',
         ],
-        'app_init' => [
-            'legacycheckin',
-            'wallet',
-        ],
         'app_dispatch' => [
             'legacycheckin',
-        ],
-        'user_delete_successed' => [
-            'third',
-            'wallet',
         ],
         'user_logout_successed' => [
             'third',

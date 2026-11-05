@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS `__PREFIX__checkin_recharge_order` (
   `coins` int unsigned NOT NULL,
   `price_fen` int unsigned NOT NULL,
   `pay_type` varchar(16) NOT NULL,
+  `payment_appid` varchar(64) NOT NULL DEFAULT '',
+  `merchant_id` varchar(32) NOT NULL DEFAULT '',
   `status` varchar(16) NOT NULL DEFAULT 'pending',
   `transaction_no` varchar(128) DEFAULT NULL,
   `createtime` bigint NOT NULL,
