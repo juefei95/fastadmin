@@ -2,6 +2,8 @@
 namespace addons\legacycheckin;
 
 use think\Addons;
+use app\common\library\Menu;
+use app\admin\model\AuthRule;
 
 class Legacycheckin extends Addons
 {
@@ -38,8 +40,19 @@ class Legacycheckin extends Addons
         if (isset(self::legacyActions()[$action])) \think\App::route(true);
     }
 
-    public function install() { return true; }
-    public function uninstall() { return true; }
-    public function enable() { return true; }
-    public function disable() { return true; }
+    private static function ensureMenu()
+    {
+        if (!AuthRule::getByName('legacycheckin')) {
+            Menu::create([['name' => 'legacycheckin', 'title' => '旧版打卡管理', 'icon' => 'fa fa-history']]);
+        }
+        if (!AuthRule::getByName('legacycheckin/user/index')) {
+            Menu::create([['name' => 'legacycheckin/user/index', 'title' => '旧版打卡用户', 'ismenu' => 1]], 'legacycheckin');
+        }
+        Menu::refresh('legacycheckin');
+    }
+
+    public function install() { self::ensureMenu(); return true; }
+    public function uninstall() { Menu::delete('legacycheckin'); return true; }
+    public function enable() { self::ensureMenu(); Menu::enable('legacycheckin'); return true; }
+    public function disable() { Menu::disable('legacycheckin'); return true; }
 }
