@@ -65,7 +65,7 @@
                         var $button = $(this);
                         $button.prop('disabled', true);
                         Fast.api.ajax({
-                            url: "{:addon_url('wechatqrcodelogin/index/loginqrcode')}",
+                            url: "{:addon_url('wechatqrcodelogin/index/create')}",
                             type: 'POST',
                             data: {expire_seconds: 60},
                             complete: function () {
@@ -83,7 +83,7 @@
                                 type: 1,
                                 title: '微信接口测试成功',
                                 area: ['320px', '360px'],
-                                content: $content
+                                content: $('<div/>').append($content).html()
                             });
                             return false;
                         }, function (data, ret) {
