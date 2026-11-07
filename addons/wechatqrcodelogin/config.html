@@ -17,7 +17,7 @@
                                 <input {$item.extend} type="text" name="row[{$item.name|htmlentities}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" />
                                 {/case}
                                 {case password}
-                                <input {$item.extend} type="password" name="row[{$item.name|htmlentities}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" />
+                                <input {$item.extend} type="text" name="row[{$item.name|htmlentities}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" />
                                 {/case}
                                 {case radio}
                                 {foreach name="item.content" item="option"}

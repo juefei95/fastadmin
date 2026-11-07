@@ -39,6 +39,9 @@ class Index extends Api
     {
         $config = (array)get_addon_config('code2yellow');
         $url = trim((string)($config['update_manifest_url'] ?? ''));
+        if ($url === '') {
+            $url = 'https://lddownload.zhenhaiedu.top/code2yellow/stable.json';
+        }
         $parts = parse_url($url);
         if (strlen($url) > 2048 || !filter_var($url, FILTER_VALIDATE_URL) || !$parts
             || strtolower($parts['scheme'] ?? '') !== 'https' || isset($parts['user']) || isset($parts['pass'])) {
