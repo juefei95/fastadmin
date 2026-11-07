@@ -1,9 +1,9 @@
-name: fastadmin-ld-release
+name: fastadmin-ld-all-backend-release
 
 services:
   web:
     image: webdevops/php-apache:7.4
-    container_name: fastadmin-ld-release-web
+    container_name: fastadmin-ld-all-backend-release-web
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
@@ -16,7 +16,7 @@ services:
       APP_TRACE: "false"
       DATABASE_TYPE: mysql
       DATABASE_HOSTNAME: mysql
-      DATABASE_DATABASE: lindiandata
+      DATABASE_DATABASE: lindianalldata
       DATABASE_USERNAME: fastadmin
       DATABASE_PASSWORD: fastadmin
       DATABASE_HOSTPORT: "3306"
@@ -27,8 +27,8 @@ services:
         condition: service_healthy
     volumes:
       - ../../:/app
-      - fastadmin-ld-release-uploads:/app/public/uploads
-      - fastadmin-ld-release-runtime:/app/runtime
+      - fastadmin-ld-all-backend-release-uploads:/app/public/uploads
+      - fastadmin-ld-all-backend-release-runtime:/app/runtime
     command: >
       bash -c "
         chmod -R 777 /app/public/uploads &&
@@ -38,7 +38,7 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: fastadmin-ld-release-mysql
+    container_name: fastadmin-ld-all-backend-release-mysql
     restart: unless-stopped
     command:
       - --character-set-server=utf8mb4
@@ -46,12 +46,12 @@ services:
       - --sql-mode=NO_ENGINE_SUBSTITUTION
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: lindiandata
+      MYSQL_DATABASE: lindianalldata
       MYSQL_USER: fastadmin
       MYSQL_PASSWORD: fastadmin
       TZ: Asia/Shanghai
     volumes:
-      - fastadmin-ld-release-mysql-data:/var/lib/mysql
+      - fastadmin-ld-all-backend-release-mysql-data:/var/lib/mysql
       #- ../../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
@@ -60,6 +60,6 @@ services:
       retries: 60
 
 volumes:
-  fastadmin-ld-release-mysql-data:
-  fastadmin-ld-release-runtime:
-  fastadmin-ld-release-uploads:
+  fastadmin-ld-all-backend-release-mysql-data:
+  fastadmin-ld-all-backend-release-runtime:
+  fastadmin-ld-all-backend-release-uploads:
