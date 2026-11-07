@@ -28,7 +28,7 @@ services:
 
       DATABASE_TYPE: mysql
       DATABASE_HOSTNAME: mysql
-      DATABASE_DATABASE: lidiandata
+      DATABASE_DATABASE: lindiandata
       DATABASE_USERNAME: root
       DATABASE_PASSWORD: root
       DATABASE_HOSTPORT: "3306"
@@ -50,7 +50,7 @@ services:
       #- ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: lidiandata
+      MYSQL_DATABASE: lindiandata
       MYSQL_USER: fastadmin
       MYSQL_PASSWORD: fastadmin
       TZ: Asia/Shanghai
@@ -58,7 +58,7 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
       interval: 5s
       timeout: 3s
-      retries: 20
+      retries: 60
 
   phpmyadmin:
     image: phpmyadmin:5
