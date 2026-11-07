@@ -4,6 +4,10 @@ return array (
   'autoload' => false,
   'hooks' => 
   array (
+    'upgrade' => 
+    array (
+      0 => 'code2yellow',
+    ),
     'user_delete_successed' => 
     array (
       0 => 'third',

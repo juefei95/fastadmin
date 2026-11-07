@@ -1,0 +1,57 @@
+<form id="config-form" class="edit-form form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="panel panel-default panel-intro">
+        <div class="panel-heading">
+            <h3 class="panel-title">Code2Yellow 公众号配置</h3>
+        </div>
+        <div class="panel-body no-padding">
+            <table class="table table-striped table-config mb-0">
+                <tbody>
+                {foreach name="$addon.config" id="item"}
+                <tr>
+                    <td width="20%">{$item.title|htmlentities}</td>
+                    <td>
+                        <div class="row">
+                            <div class="col-sm-8 col-xs-12">
+                                {switch $item.type}
+                                {case string}
+                                <input {$item.extend} type="text" name="row[{$item.name|htmlentities}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" />
+                                {/case}
+                                {case password}
+                                <input {$item.extend} type="password" name="row[{$item.name|htmlentities}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" />
+                                {/case}
+                                {case radio}
+                                {foreach name="item.content" item="option"}
+                                <label class="radio-inline" for="row[{$item.name|htmlentities}]-{$key|htmlentities}">
+                                    <input id="row[{$item.name|htmlentities}]-{$key|htmlentities}" name="row[{$item.name|htmlentities}]" type="radio" value="{$key|htmlentities}" {in name="key" value="$item.value"}checked{/in} /> {$option|htmlentities}
+                                </label>
+                                {/foreach}
+                                {/case}
+                                {/switch}
+                                <span class="help-block">{$item.tip|htmlentities}</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {/foreach}
+                </tbody>
+            </table>
+            <div class="alert alert-info" style="margin:20px;">
+                凭据全部留空时复用公共微信扫码登录插件配置及其回调。使用独立公众号时，请将公众号服务器地址设置为当前后端域名下的 /addons/code2yellow/index/notify；创建二维码、轮询和微信回调必须访问同一后端及缓存。
+            </div>
+            <div class="form-group layer-footer">
+                <label class="control-label col-xs-12 col-sm-2"></label>
+                <div class="col-xs-12 col-sm-8">
+                    <button type="submit" class="btn btn-primary btn-embossed disabled">{:__('OK')}</button>
+                    <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    require.callback = function () {
+        define('backend/addon', ['backend', 'form'], function (Backend, Form) {
+            return {config: function () { Form.api.bindevent($('form[role=form]')); }};
+        });
+    };
+</script>
