@@ -9,7 +9,7 @@ services:
     working_dir: /app
     command: php -S 0.0.0.0:8000 -t public
     ports:
-      - "8005:8000"
+      - "5105:8000"
     volumes:
       - ../:/app
       - ./xdebug.ini:/usr/local/etc/php/conf.d/99-xdebug.ini
@@ -58,13 +58,13 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
       interval: 5s
       timeout: 3s
-      retries: 20
+      retries: 60
 
   phpmyadmin:
     image: phpmyadmin:5
     container_name: fastadmin-rustdesk-debug-phpmyadmin
     ports:
-      - "8006:80"
+      - "5106:80"
     environment:
       PMA_HOST: mysql
       PMA_PORT: "3306"
