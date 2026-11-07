@@ -12,7 +12,7 @@ composer.lock
 *.log
 *.css.map
 !.gitkeep
-.env
+!.env
 .svn
 .vscode
 node_modules
