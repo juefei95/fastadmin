@@ -1,5 +1,5 @@
 <?php
-namespace addons\legacycheckin\controller;
+namespace addons\checkinlegacy\controller;
 
 use addons\third\library\Service;
 use addons\third\model\Third;
@@ -50,7 +50,7 @@ class Api extends BaseApi
         if (!$this->request->isPost()) $this->error('请求方法错误');
         $code = trim((string)$this->request->post('code', ''));
         if (!$code) $this->error('缺少微信登录 code');
-        $config = get_addon_config('legacycheckin') ?: [];
+        $config = get_addon_config('checkinlegacy') ?: [];
         $appid = trim((string)($config['wxapp_appid'] ?? ''));
         $secret = trim((string)($config['wxapp_secret'] ?? ''));
         if (!$appid || !$secret) $this->error('旧小程序配置缺失');

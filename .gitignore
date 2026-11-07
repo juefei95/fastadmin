@@ -5,7 +5,7 @@
 /addons/*
 !/addons/wallet
 !/addons/checkin
-!/addons/legacycheckin
+!/addons/checkinlegacy
 /public/assets/libs/
 /public/assets/addons/*
 /public/uploads/*

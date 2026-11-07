@@ -1,5 +1,5 @@
 <?php
-namespace app\admin\controller\legacycheckin;
+namespace app\admin\controller\checkinlegacy;
 
 use app\common\controller\Backend;
 use think\Db;

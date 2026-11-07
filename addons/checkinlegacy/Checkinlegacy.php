@@ -1,11 +1,11 @@
 <?php
-namespace addons\legacycheckin;
+namespace addons\checkinlegacy;
 
 use think\Addons;
 use app\common\library\Menu;
 use app\admin\model\AuthRule;
 
-class Legacycheckin extends Addons
+class Checkinlegacy extends Addons
 {
     private static function legacyActions()
     {
@@ -27,7 +27,7 @@ class Legacycheckin extends Addons
     {
         foreach (self::legacyActions() as $path => $action) {
             \think\Route::rule('api/user/' . $path . '$',
-                '\\think\\addons\\Route@execute?addon=legacycheckin&controller=api&action=' . $action,
+                '\\think\\addons\\Route@execute?addon=checkinlegacy&controller=api&action=' . $action,
                 $path === 'index' ? 'GET' : 'POST');
         }
     }
@@ -42,23 +42,23 @@ class Legacycheckin extends Addons
 
     private static function ensureMenu()
     {
-        $root = AuthRule::getByName('legacycheckin');
+        $root = AuthRule::getByName('checkinlegacy');
         if (!$root) {
-            Menu::create([['name' => 'legacycheckin', 'title' => '旧版打卡签到管理', 'icon' => 'fa fa-history', 'ismenu' => 1]]);
+            Menu::create([['name' => 'checkinlegacy', 'title' => '旧版打卡签到管理', 'icon' => 'fa fa-history', 'ismenu' => 1]]);
         } else {
             $changes = [];
             if (!(int)$root['ismenu']) $changes['ismenu'] = 1;
             if ($root['title'] === '旧版打卡管理') $changes['title'] = '旧版打卡签到管理';
             if ($changes) $root->save($changes);
         }
-        if (!AuthRule::getByName('legacycheckin/user/index')) {
-            Menu::create([['name' => 'legacycheckin/user/index', 'title' => '旧版打卡用户', 'ismenu' => 1]], 'legacycheckin');
+        if (!AuthRule::getByName('checkinlegacy/user/index')) {
+            Menu::create([['name' => 'checkinlegacy/user/index', 'title' => '旧版打卡用户', 'ismenu' => 1]], 'checkinlegacy');
         }
-        Menu::refresh('legacycheckin');
+        Menu::refresh('checkinlegacy');
     }
 
     public function install() { self::ensureMenu(); return true; }
-    public function uninstall() { Menu::delete('legacycheckin'); return true; }
-    public function enable() { self::ensureMenu(); Menu::enable('legacycheckin'); return true; }
-    public function disable() { Menu::disable('legacycheckin'); return true; }
+    public function uninstall() { Menu::delete('checkinlegacy'); return true; }
+    public function enable() { self::ensureMenu(); Menu::enable('checkinlegacy'); return true; }
+    public function disable() { Menu::disable('checkinlegacy'); return true; }
 }

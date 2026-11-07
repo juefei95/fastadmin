@@ -5,7 +5,7 @@ return [
     'hooks' => [
         'app_init' => [
             'checkin',
-            'legacycheckin',
+            'checkinlegacy',
             'wallet',
         ],
         'user_delete_successed' => [
@@ -28,7 +28,7 @@ return [
             'third',
         ],
         'app_dispatch' => [
-            'legacycheckin',
+            'checkinlegacy',
         ],
         'user_logout_successed' => [
             'third',
