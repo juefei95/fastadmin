@@ -1,0 +1,112 @@
+
+<div class="panel panel-default panel-intro checkin-page">{:build_heading()}<div class="panel-body">
+<p>启用的项目会出现在 展示柜，Android 项目展示下载二维码；排序值越小越靠前。</p>
+<details><summary>添加推广项目</summary><form class="promotion-form" novalidate method="post" action="{:url('code2yellow/promotion/save')}">{:token()}<input type="hidden" name="id" value="0">
+<div class="form-group"><label>名称</label><input class="form-control" name="title" maxlength="40" value="" required></div>
+<div class="form-group"><label>简介</label><input class="form-control" name="description" maxlength="80" value=""></div>
+<div class="form-group"><label>跳转类型</label><select class="form-control" name="target_type"><option value="web" >HTTPS 网页</option><option value="wechat" >微信小程序二维码</option><option value="app" >Android 下载二维码</option><option value="game">微信小游戏</option></select></div>
+<div class="form-group"><label>跳转地址或 stable 清单地址</label><input id="promotion-target-new" class="form-control" name="target" maxlength="1000" value="" required><button type="button" class="btn btn-danger faupload" data-input-id="promotion-target-new" data-mimetype="image/png,image/jpeg,image/webp" data-multiple="false">上传二维码</button><p class="help-block">网页填写 HTTPS 地址；小程序请上传二维码图片；Android 填写 HTTPS stable 清单地址。</p></div>
+<div class="game-fields" style="display:none"><div class="form-group"><label>小游戏 AppID</label><input class="form-control" name="game_appid" maxlength="32" value=""></div><div class="form-group"><label>小游戏 AppSecret</label><input class="form-control" name="game_secret" type="password" maxlength="128" autocomplete="new-password" value=""></div><div class="form-group"><label>小游戏参数</label><input class="form-control" name="game_path" maxlength="128" value="?from=pc"></div></div>
+<div class="form-group"><label>排序（越小越靠前）</label><input class="form-control" type="number" name="weigh" min="0" max="1000000" value="0" required></div>
+<div class="form-group"><label>状态</label><select class="form-control" name="enabled"><option value="0" >停用</option><option value="1" >启用</option></select></div>
+<p class="promotion-error text-danger" role="alert" hidden></p><button type="submit" class="btn btn-primary {:$auth->check('code2yellow/promotion/save')?'':'hide'}">保存</button></form></details><hr>
+{volist name="promotions" id="row"}<details><summary>#{$row.id} {$row.title|htmlentities} {if condition="$row.enabled eq 1"}（启用）{else /}（停用）{/if}</summary><form class="promotion-form" novalidate method="post" action="{:url('code2yellow/promotion/save')}">{:token()}<input type="hidden" name="id" value="{$row.id}">
+<div class="form-group"><label>名称</label><input class="form-control" name="title" maxlength="40" value="{$row.title|htmlentities}" required></div>
+<div class="form-group"><label>简介</label><input class="form-control" name="description" maxlength="80" value="{$row.description|htmlentities}"></div>
+<div class="form-group"><label>跳转类型</label><select class="form-control" name="target_type"><option value="web" {if condition="$row.target_type eq 'web'"}selected{/if}>HTTPS 网页</option><option value="wechat" {if condition="$row.target_type eq 'wechat'"}selected{/if}>微信小程序二维码</option><option value="app" {if condition="$row.target_type eq 'app'"}selected{/if}>Android 下载二维码</option><option value="game" {if condition="$row.target_type eq 'game'"}selected{/if}>微信小游戏</option></select></div>
+<div class="form-group"><label>跳转地址或 stable 清单地址</label><input id="promotion-target-{$row.id}" class="form-control" name="target" maxlength="1000" value="{$row.target|htmlentities}" required><button type="button" class="btn btn-danger faupload" data-input-id="promotion-target-{$row.id}" data-mimetype="image/png,image/jpeg,image/webp" data-multiple="false">上传二维码</button><p class="help-block">网页填写 HTTPS 地址；小程序请上传二维码图片；Android 填写 HTTPS stable 清单地址。</p></div>
+<div class="game-fields" style="display:none"><div class="form-group"><label>小游戏 AppID</label><input class="form-control" name="game_appid" maxlength="32" value="{$row.game_appid|htmlentities}"></div><div class="form-group"><label>小游戏 AppSecret</label><input class="form-control" name="game_secret" type="password" maxlength="128" autocomplete="new-password" value=""><p class="help-block">留空保留原密钥；更换 AppID 时请重新填写。</p></div><div class="form-group"><label>小游戏参数</label><input class="form-control" name="game_path" maxlength="128" value="{if condition="$row.game_path eq ''"}?from=pc{else /}{$row.game_path|htmlentities}{/if}"></div></div>
+<div class="form-group"><label>排序（越小越靠前）</label><input class="form-control" type="number" name="weigh" min="0" max="1000000" value="{$row.weigh}" required></div>
+<div class="form-group"><label>状态</label><select class="form-control" name="enabled"><option value="0" {if condition="$row.enabled eq 0"}selected{/if}>停用</option><option value="1" {if condition="$row.enabled eq 1"}selected{/if}>启用</option></select></div>
+<p class="promotion-error text-danger" role="alert" hidden></p><button type="submit" class="btn btn-primary {:$auth->check('code2yellow/promotion/save')?'':'hide'}">保存</button></form></details><hr>{/volist}
+</div></div>
+<script>
+(function () {
+    function clearError(form, input) {
+        if (!input) return;
+        input.removeAttribute('aria-invalid');
+        var group = input.closest('.form-group');
+        if (!group) return;
+        group.classList.remove('has-error');
+        var message = group.querySelector('.promotion-field-error');
+        if (message) message.remove();
+    }
+    function showError(form, field, message) {
+        var input = field && form.elements.namedItem(field);
+        if (!input) {
+            var summary = form.querySelector('.promotion-error');
+            summary.textContent = message;
+            summary.hidden = false;
+            return;
+        }
+        clearError(form, input);
+        input.setAttribute('aria-invalid', 'true');
+        var group = input.closest('.form-group');
+        group.classList.add('has-error');
+        var error = document.createElement('p');
+        error.className = 'help-block promotion-field-error';
+        error.setAttribute('role', 'alert');
+        error.textContent = message;
+        group.appendChild(error);
+        input.focus();
+    }
+    function validate(form) {
+        var title = form.elements.namedItem('title').value.trim();
+        var description = form.elements.namedItem('description').value.trim();
+        var target = form.elements.namedItem('target').value.trim();
+        var type = form.elements.namedItem('target_type').value;
+        var weigh = form.elements.namedItem('weigh').value;
+        if (!title || Array.from(title).length > 40 || /[\x00-\x1f\x7f]/.test(title)) return ['title', '名称须为 1 至 40 个字符'];
+        if (Array.from(description).length > 80 || /[\x00-\x1f\x7f]/.test(description)) return ['description', '简介不能超过 80 个字符'];
+        if (!/^\d+$/.test(weigh) || Number(weigh) > 1000000) return ['weigh', '排序须为 0 至 1000000 的整数'];
+        if (type !== 'game' && (!target || target.length > 1000 || /[\x00-\x20\x7f]/.test(target))) return ['target', '请填写有效的跳转地址或 stable 清单地址'];
+        if (type === 'game') {
+            if (!/^wx[0-9a-fA-F]{16}$/.test(form.elements.namedItem('game_appid').value.trim())) return ['game_appid', '请输入有效的小游戏 AppID'];
+            if (!/^\?\S+$/.test(form.elements.namedItem('game_path').value.trim()) || new TextEncoder().encode(form.elements.namedItem('game_path').value.trim()).length > 128) return ['game_path', '请输入不超过 128 字节的小游戏参数'];
+        } else if (type === 'web') {
+            try { var url = new URL(target); if (url.protocol !== 'https:' || !url.hostname || url.username || url.password) throw new Error(); }
+            catch (_) { return ['target', '网页链接须为 HTTPS 地址']; }
+        } else if (type === 'wechat') {
+            var local = /^\/uploads\/[A-Za-z0-9_./%\-]+$/.test(target) && !target.includes('..');
+            var remote = false;
+            try { var image = new URL(target); remote = image.protocol === 'https:' && !!image.hostname && !image.username && !image.password; } catch (_) {}
+            if (!local && !remote) return ['target', '请上传小程序二维码图片'];
+        }
+        else if (type === 'app') { try { var manifest = new URL(target); if (manifest.protocol !== 'https:' || !manifest.hostname || manifest.username || manifest.password) throw new Error(); } catch (_) { return ['target', '请输入有效的 HTTPS stable 清单地址']; } }
+        return null;
+    }
+    document.querySelectorAll('.promotion-form').forEach(function (form) {
+        function updateUploadVisibility() {
+            var type = form.elements.namedItem('target_type').value;
+            form.querySelector('.faupload').style.display = type === 'wechat' ? '' : 'none';
+            form.querySelector('.game-fields').style.display = type === 'game' ? '' : 'none';
+            form.elements.namedItem('target').closest('.form-group').style.display = type === 'game' ? 'none' : '';
+        }
+        updateUploadVisibility();
+        form.addEventListener('input', function (e) { clearError(form, e.target); });
+        form.addEventListener('change', function (e) {
+            clearError(form, e.target);
+            if (e.target.name === 'target_type') { clearError(form, form.elements.namedItem('target')); updateUploadVisibility(); }
+        });
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            form.querySelector('.promotion-error').hidden = true;
+            form.querySelectorAll('[aria-invalid="true"]').forEach(function (input) { clearError(form, input); });
+            var error = validate(form);
+            if (error) { showError(form, error[0], error[1]); return; }
+            var button = form.querySelector('button[type=submit]'); button.disabled = true;
+            fetch(form.action, {method: 'POST', body: new URLSearchParams(new FormData(form)), credentials: 'same-origin', headers: {'X-Requested-With': 'XMLHttpRequest'}})
+                .then(function (response) {
+                    var token = response.headers.get('__token__');
+                    if (token) document.querySelectorAll('.promotion-form input[name="__token__"]').forEach(function (input) { input.value = token; });
+                    return response.json();
+                }).then(function (result) {
+                    if (result.data && result.data.__token__) document.querySelectorAll('.promotion-form input[name="__token__"]').forEach(function (input) { input.value = result.data.__token__; });
+                    if (result.code === 1) { location.reload(); return; }
+                    showError(form, result.data && result.data.field, result.msg || '保存失败，请重试');
+                    button.disabled = false;
+                }).catch(function () { showError(form, null, '请求失败，请检查网络后重试'); button.disabled = false; });
+        });
+    });
+})();
+</script>
