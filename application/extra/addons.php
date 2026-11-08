@@ -13,6 +13,9 @@ return [
             'epay',
             'third',
         ],
+        'upgrade' => [
+            'remotecontrol',
+        ],
         'user_delete_successed' => [
             'third',
         ],

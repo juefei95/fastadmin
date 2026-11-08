@@ -17,7 +17,7 @@
                                 <input {$item.extend} type="text" name="row[{$item.name|htmlentities}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" />
                                 {/case}
                                 {case password}
-                                <input {$item.extend} type="password" name="row[{$item.name|htmlentities}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" />
+                                <input {$item.extend} type="text" name="row[{$item.name|htmlentities}]" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" />
                                 {/case}
                                 {case radio}
                                 {foreach name="item.content" item="option"}
@@ -65,7 +65,7 @@
                         var $button = $(this);
                         $button.prop('disabled', true);
                         Fast.api.ajax({
-                            url: "{:addon_url('wechatqrcodelogin/index/loginqrcode')}",
+                            url: "{:addon_url('wechatqrcodelogin/index/create')}",
                             type: 'POST',
                             data: {expire_seconds: 60},
                             complete: function () {
@@ -83,7 +83,7 @@
                                 type: 1,
                                 title: '微信接口测试成功',
                                 area: ['320px', '360px'],
-                                content: $content
+                                content: $('<div/>').append($content).html()
                             });
                             return false;
                         }, function (data, ret) {
