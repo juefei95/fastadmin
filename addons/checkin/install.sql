@@ -49,3 +49,17 @@ CREATE TABLE IF NOT EXISTS `__PREFIX__checkin_recharge_order` (
   PRIMARY KEY (`id`), UNIQUE KEY `order_no` (`order_no`),
   KEY `user_time` (`user_id`,`createtime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='充值订单';
+
+CREATE TABLE IF NOT EXISTS `__PREFIX__checkin_announcement` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `content` text NOT NULL,
+  `enabled` tinyint unsigned NOT NULL DEFAULT 0,
+  `starttime` bigint NOT NULL DEFAULT 0,
+  `endtime` bigint NOT NULL DEFAULT 0,
+  `version` int unsigned NOT NULL DEFAULT 1,
+  `weigh` int NOT NULL DEFAULT 0,
+  `createtime` bigint NOT NULL DEFAULT 0,
+  `updatetime` bigint NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`), KEY `active` (`enabled`,`starttime`,`endtime`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Android公告';

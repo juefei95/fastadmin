@@ -1,0 +1,51 @@
+{include file="checkin/common/style" /}
+<div class="panel panel-default panel-intro checkin-page">
+    {:build_heading()}
+    <div class="panel-body">
+        <p>Android 首页展示一条有效公告，排序值越小越优先，同排序时展示最新公告。时间为北京时间，留空表示不限制。</p>
+        <details><summary>添加公告</summary>
+        <form class="announcement-form" method="post" action="{:url('checkin/announcement/save')}">
+            {:token()}<input type="hidden" name="id" value="0">
+            <div class="form-group"><label>标题</label><input class="form-control" name="title" maxlength="100" required></div>
+            <div class="form-group"><label>正文</label><textarea class="form-control" name="content" rows="5" maxlength="5000" required></textarea></div>
+            <div class="form-group"><label>开始时间</label><input class="form-control" type="datetime-local" name="starttime"></div>
+            <div class="form-group"><label>结束时间</label><input class="form-control" type="datetime-local" name="endtime"></div>
+            <div class="form-group"><label>排序</label><input class="form-control" type="number" name="weigh" min="0" max="1000000" value="0" required></div>
+            <div class="form-group"><label>状态</label><select class="form-control" name="enabled"><option value="0">停用</option><option value="1">启用</option></select></div>
+            <button class="btn btn-primary {:$auth->check('checkin/announcement/save')?'':'hide'}">保存</button> <button type="button" class="btn btn-default announcement-preview">预览</button>
+            <div class="preview" hidden style="margin:12px 0;padding:16px;border:1px solid #ddd;border-radius:8px"><strong></strong><p style="white-space:pre-wrap;overflow-wrap:anywhere"></p></div>
+        </form></details><hr>
+        {volist name="announcements" id="row"}
+        <details><summary>#{$row.id} {$row.title|htmlentities} {if condition="$row.enabled eq 1"}（启用）{else /}（停用）{/if} · 版本 {$row.version}</summary>
+        <form class="announcement-form" method="post" action="{:url('checkin/announcement/save')}">
+            {:token()}<input type="hidden" name="id" value="{$row.id}">
+            <div class="form-group"><label>标题</label><input class="form-control" name="title" maxlength="100" value="{$row.title|htmlentities}" required></div>
+            <div class="form-group"><label>正文</label><textarea class="form-control" name="content" rows="5" maxlength="5000" required>{$row.content|htmlentities}</textarea></div>
+            <div class="form-group"><label>开始时间</label><input class="form-control" type="datetime-local" name="starttime" value="{if condition="$row.starttime gt 0"}{:gmdate('Y-m-d\TH:i', $row['starttime'] + 28800)}{/if}"></div>
+            <div class="form-group"><label>结束时间</label><input class="form-control" type="datetime-local" name="endtime" value="{if condition="$row.endtime gt 0"}{:gmdate('Y-m-d\TH:i', $row['endtime'] + 28800)}{/if}"></div>
+            <div class="form-group"><label>排序</label><input class="form-control" type="number" name="weigh" min="0" max="1000000" value="{$row.weigh}" required></div>
+            <div class="form-group"><label>状态</label><select class="form-control" name="enabled"><option value="0" {if condition="$row.enabled eq 0"}selected{/if}>停用</option><option value="1" {if condition="$row.enabled eq 1"}selected{/if}>启用</option></select></div>
+            <button class="btn btn-primary {:$auth->check('checkin/announcement/save')?'':'hide'}">保存</button> <button type="button" class="btn btn-default announcement-preview">预览</button>
+            <div class="preview" hidden style="margin:12px 0;padding:16px;border:1px solid #ddd;border-radius:8px"><strong></strong><p style="white-space:pre-wrap;overflow-wrap:anywhere"></p></div>
+            <button type="button" class="btn btn-warning announcement-reset {:$auth->check('checkin/announcement/reset')?'':'hide'}">重新向所有设备弹出</button>
+            <p>保存内容不会自动重置用户的关闭选择；需要重新展示时请点击上方按钮。</p>
+        </form></details><hr>
+        {/volist}
+    </div>
+</div>
+<script>
+(function () {
+    function send(form, url) {
+        var buttons = form.querySelectorAll('button'); buttons.forEach(function(b){ b.disabled=true; });
+        fetch(url, {method:'POST', body:new URLSearchParams(new FormData(form)), credentials:'same-origin', headers:{'X-Requested-With':'XMLHttpRequest'}})
+            .then(function(r){return r.json();}).then(function(r){if(r.code===1) location.reload(); else {alert(r.msg||'操作失败'); location.reload();}})
+            .catch(function(){alert('请求失败，请刷新后重试'); buttons.forEach(function(b){ b.disabled=false; });});
+    }
+    document.querySelectorAll('.announcement-form').forEach(function(form){
+        form.addEventListener('submit', function(e){e.preventDefault(); send(form, form.action);});
+        form.querySelector('.announcement-preview').addEventListener('click', function(){var box=form.querySelector('.preview'); box.querySelector('strong').textContent=form.elements.title.value; box.querySelector('p').textContent=form.elements.content.value; box.hidden=false;});
+        var reset=form.querySelector('.announcement-reset');
+        if(reset) reset.addEventListener('click', function(){if(confirm('重新向所有设备弹出此公告？')) send(form, "{:url('checkin/announcement/reset')}");});
+    });
+})();
+</script>

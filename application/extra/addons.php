@@ -17,6 +17,9 @@ return [
             'checkin',
             'wallet',
         ],
+        'app_dispatch' => [
+            'checkinlegacy',
+        ],
         'epay_config_init' => [
             'epay',
         ],
@@ -26,9 +29,6 @@ return [
         'action_begin' => [
             'epay',
             'third',
-        ],
-        'app_dispatch' => [
-            'checkinlegacy',
         ],
         'user_logout_successed' => [
             'third',

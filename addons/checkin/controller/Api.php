@@ -14,8 +14,20 @@ use think\Validate;
 
 class Api extends BaseApi
 {
-    protected $noNeedLogin = ['login', 'accountlogin', 'rewardconfig', 'rechargepackages'];
+    protected $noNeedLogin = ['login', 'accountlogin', 'rewardconfig', 'rechargepackages', 'announcement'];
     protected $noNeedRight = '*';
+
+    public function announcement()
+    {
+        $now = time();
+        $row = Db::name('checkin_announcement')->where('enabled', 1)
+            ->where('starttime', '<=', $now)
+            ->where(function ($q) use ($now) { $q->where('endtime', 0)->whereOr('endtime', '>', $now); })
+            ->order('weigh asc,id desc')->field('id,title,content,version')->find();
+        if ($row) { $row['id'] = (int)$row['id']; $row['version'] = (int)$row['version']; }
+        $date = (new \DateTimeImmutable('now', new \DateTimeZone('Asia/Shanghai')))->format('Y-m-d');
+        $this->success('', ['announcement' => $row ?: null, 'date' => $date]);
+    }
 
     private function miniappUserId()
     {
