@@ -1,0 +1,95 @@
+{include file="checkin/common/style" /}
+<div class="panel panel-default panel-intro checkin-page">{:build_heading()}<div class="panel-body">
+<p>启用的项目会出现在 Android 首页推广宫格，全部停用时隐藏宫格；排序值越小越靠前。</p>
+<details><summary>添加推广项目</summary><form class="promotion-form" novalidate method="post" action="{:url('checkin/promotion/save')}">{:token()}<input type="hidden" name="id" value="0">
+<div class="form-group"><label>名称</label><input class="form-control" name="title" maxlength="40" value="" required></div>
+<div class="form-group"><label>简介</label><input class="form-control" name="description" maxlength="80" value=""></div>
+<div class="form-group"><label>跳转类型</label><select class="form-control" name="target_type"><option value="web" >HTTPS 网页</option><option value="wechat" >微信小程序 URL Scheme</option><option value="app" >已安装 Android 应用</option></select></div>
+<div class="form-group"><label>跳转地址或包名</label><input class="form-control" name="target" maxlength="1000" value="" required><p class="help-block">网页填写 HTTPS 地址；小程序填写 weixin://dl/business/?t=... 或明文 ?appid=...；应用填写 Android 包名。</p></div>
+<div class="form-group"><label>排序（越小越靠前）</label><input class="form-control" type="number" name="weigh" min="0" max="1000000" value="0" required></div>
+<div class="form-group"><label>状态</label><select class="form-control" name="enabled"><option value="0" >停用</option><option value="1" >启用</option></select></div>
+<p class="promotion-error text-danger" role="alert" hidden></p><button class="btn btn-primary {:$auth->check('checkin/promotion/save')?'':'hide'}">保存</button></form></details><hr>
+{volist name="promotions" id="row"}<details><summary>#{$row.id} {$row.title|htmlentities} {if condition="$row.enabled eq 1"}（启用）{else /}（停用）{/if}</summary><form class="promotion-form" novalidate method="post" action="{:url('checkin/promotion/save')}">{:token()}<input type="hidden" name="id" value="{$row.id}">
+<div class="form-group"><label>名称</label><input class="form-control" name="title" maxlength="40" value="{$row.title|htmlentities}" required></div>
+<div class="form-group"><label>简介</label><input class="form-control" name="description" maxlength="80" value="{$row.description|htmlentities}"></div>
+<div class="form-group"><label>跳转类型</label><select class="form-control" name="target_type"><option value="web" {if condition="$row.target_type eq 'web'"}selected{/if}>HTTPS 网页</option><option value="wechat" {if condition="$row.target_type eq 'wechat'"}selected{/if}>微信小程序 URL Scheme</option><option value="app" {if condition="$row.target_type eq 'app'"}selected{/if}>已安装 Android 应用</option></select></div>
+<div class="form-group"><label>跳转地址或包名</label><input class="form-control" name="target" maxlength="1000" value="{$row.target|htmlentities}" required><p class="help-block">网页填写 HTTPS 地址；小程序填写 weixin://dl/business/?t=... 或明文 ?appid=...；应用填写 Android 包名。</p></div>
+<div class="form-group"><label>排序（越小越靠前）</label><input class="form-control" type="number" name="weigh" min="0" max="1000000" value="{$row.weigh}" required></div>
+<div class="form-group"><label>状态</label><select class="form-control" name="enabled"><option value="0" {if condition="$row.enabled eq 0"}selected{/if}>停用</option><option value="1" {if condition="$row.enabled eq 1"}selected{/if}>启用</option></select></div>
+<p class="promotion-error text-danger" role="alert" hidden></p><button class="btn btn-primary {:$auth->check('checkin/promotion/save')?'':'hide'}">保存</button></form></details><hr>{/volist}
+</div></div>
+<script>
+(function () {
+    function clearError(form, input) {
+        if (!input) return;
+        input.removeAttribute('aria-invalid');
+        var group = input.closest('.form-group');
+        if (!group) return;
+        group.classList.remove('has-error');
+        var message = group.querySelector('.promotion-field-error');
+        if (message) message.remove();
+    }
+    function showError(form, field, message) {
+        var input = field && form.elements.namedItem(field);
+        if (!input) {
+            var summary = form.querySelector('.promotion-error');
+            summary.textContent = message;
+            summary.hidden = false;
+            return;
+        }
+        clearError(form, input);
+        input.setAttribute('aria-invalid', 'true');
+        var group = input.closest('.form-group');
+        group.classList.add('has-error');
+        var error = document.createElement('p');
+        error.className = 'help-block promotion-field-error';
+        error.setAttribute('role', 'alert');
+        error.textContent = message;
+        group.appendChild(error);
+        input.focus();
+    }
+    function validate(form) {
+        var title = form.elements.namedItem('title').value.trim();
+        var description = form.elements.namedItem('description').value.trim();
+        var target = form.elements.namedItem('target').value.trim();
+        var type = form.elements.namedItem('target_type').value;
+        var weigh = form.elements.namedItem('weigh').value;
+        if (!title || Array.from(title).length > 40 || /[\x00-\x1f\x7f]/.test(title)) return ['title', '名称须为 1 至 40 个字符'];
+        if (Array.from(description).length > 80 || /[\x00-\x1f\x7f]/.test(description)) return ['description', '简介不能超过 80 个字符'];
+        if (!/^\d+$/.test(weigh) || Number(weigh) > 1000000) return ['weigh', '排序须为 0 至 1000000 的整数'];
+        if (!target || target.length > 1000 || /[\x00-\x20\x7f]/.test(target)) return ['target', '请填写有效的跳转地址或包名'];
+        if (type === 'web') {
+            try { var url = new URL(target); if (url.protocol !== 'https:' || !url.hostname || url.username || url.password) throw new Error(); }
+            catch (_) { return ['target', '网页链接须为 HTTPS 地址']; }
+        } else if (type === 'wechat' && !/^weixin:\/\/dl\/business\/\?(?:t=[A-Za-z0-9_-]+|appid=wx[0-9a-fA-F]{16}(?:&(?:path|query|env_version)=[A-Za-z0-9._~%+\/-]*)*)$/.test(target)) return ['target', '请输入有效的微信小程序 URL Scheme'];
+        else if (type === 'app' && !/^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$/.test(target)) return ['target', '请输入有效的 Android 包名'];
+        return null;
+    }
+    document.querySelectorAll('.promotion-form').forEach(function (form) {
+        form.addEventListener('input', function (e) { clearError(form, e.target); });
+        form.addEventListener('change', function (e) {
+            clearError(form, e.target);
+            if (e.target.name === 'target_type') clearError(form, form.elements.namedItem('target'));
+        });
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            form.querySelector('.promotion-error').hidden = true;
+            form.querySelectorAll('[aria-invalid="true"]').forEach(function (input) { clearError(form, input); });
+            var error = validate(form);
+            if (error) { showError(form, error[0], error[1]); return; }
+            var button = form.querySelector('button'); button.disabled = true;
+            fetch(form.action, {method: 'POST', body: new URLSearchParams(new FormData(form)), credentials: 'same-origin', headers: {'X-Requested-With': 'XMLHttpRequest'}})
+                .then(function (response) {
+                    var token = response.headers.get('__token__');
+                    if (token) document.querySelectorAll('.promotion-form input[name="__token__"]').forEach(function (input) { input.value = token; });
+                    return response.json();
+                }).then(function (result) {
+                    if (result.data && result.data.__token__) document.querySelectorAll('.promotion-form input[name="__token__"]').forEach(function (input) { input.value = result.data.__token__; });
+                    if (result.code === 1) { location.reload(); return; }
+                    showError(form, result.data && result.data.field, result.msg || '保存失败，请重试');
+                    button.disabled = false;
+                }).catch(function () { showError(form, null, '请求失败，请检查网络后重试'); button.disabled = false; });
+        });
+    });
+})();
+</script>

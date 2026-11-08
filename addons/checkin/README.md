@@ -17,3 +17,5 @@
 仅从旧项目迁移历史数据时才运行 `php addons/checkin/migrate.php` 预览及 `php addons/checkin/migrate.php --apply` 转换。新安装不需要运行迁移脚本。脚本保留旧列和旧流水；没有旧 `wechatopenid` 列时跳过旧微信绑定转换。
 
 Android 公告：新安装自动创建公告表。已安装的站点执行 `php addons/checkin/announcement_schema.php` 预览，再执行 `php addons/checkin/announcement_schema.php --apply`；同步插件内 `application/admin/controller/checkin/Announcement.php` 和 `application/admin/view/checkin/announcement/index.html` 到站点对应目录，然后重新启用插件补充菜单及权限。后台可维护多条公告，排序值越小越优先，同排序取最新一条；时间为北京时间，结束时间为不包含的边界。`GET /addons/checkin/api/announcement` 无需登录，返回当前公告及北京时间日期。保存公告不会重置用户选择，点击“重新向所有设备弹出”才增加版本号。关闭选择保存在设备本地。
+
+Android 首页推广：新安装自动建表。已安装站点运行 `php addons/checkin/promotion_schema.php --apply`，同步插件内 `application/admin/controller/checkin/Promotion.php` 与 `application/admin/view/checkin/promotion/index.html` 到站点对应路径，并重新启用插件补充权限菜单。后台可配置名称、简介、类型、目标、启用状态和排序；未启用时不展示。网页只支持 HTTPS，小程序需使用微信生成的 URL Scheme，应用需填写已安装的 Android 包名。`GET /addons/checkin/api/promotions` 无需登录，最多返回 100 项。

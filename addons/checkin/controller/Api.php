@@ -14,8 +14,17 @@ use think\Validate;
 
 class Api extends BaseApi
 {
-    protected $noNeedLogin = ['login', 'accountlogin', 'rewardconfig', 'rechargepackages', 'announcement'];
+    protected $noNeedLogin = ['login', 'accountlogin', 'rewardconfig', 'rechargepackages', 'announcement', 'promotions'];
     protected $noNeedRight = '*';
+
+    public function promotions()
+    {
+        $rows = Db::name('checkin_promotion')->where('enabled', 1)
+            ->field('id,title,description,target_type,target')->order('weigh asc,id desc')->limit(100)->select();
+        foreach ($rows as &$row) $row['id'] = (int)$row['id'];
+        unset($row);
+        $this->success('', ['items' => $rows]);
+    }
 
     public function announcement()
     {

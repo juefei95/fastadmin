@@ -63,3 +63,16 @@ CREATE TABLE IF NOT EXISTS `__PREFIX__checkin_announcement` (
   `updatetime` bigint NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`), KEY `active` (`enabled`,`starttime`,`endtime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Android公告';
+
+CREATE TABLE IF NOT EXISTS `__PREFIX__checkin_promotion` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(40) NOT NULL,
+  `description` varchar(80) NOT NULL DEFAULT '',
+  `target_type` varchar(16) NOT NULL,
+  `target` varchar(1000) NOT NULL,
+  `enabled` tinyint unsigned NOT NULL DEFAULT 0,
+  `weigh` int unsigned NOT NULL DEFAULT 0,
+  `createtime` bigint NOT NULL DEFAULT 0,
+  `updatetime` bigint NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`), KEY `display_order` (`enabled`,`weigh`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Android首页推广';

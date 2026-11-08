@@ -46,7 +46,7 @@ class Checkin extends Addons
         } else {
             if (($root['title'] ?? '') === '打卡管理') $root->save(['title' => '打卡签到管理']);
             $missing = [];
-            foreach ([['name' => 'checkin/user/index', 'title' => '打卡用户', 'ismenu' => 1], ['name' => 'checkin/recharge/createpackage', 'title' => '添加套餐', 'ismenu' => 0], ['name' => 'checkin/recharge/deletepackage', 'title' => '删除套餐', 'ismenu' => 0], self::announcementMenu(), self::announcementSaveRule(), self::announcementResetRule(), self::configMenu()] as $rule) {
+            foreach ([['name' => 'checkin/user/index', 'title' => '打卡用户', 'ismenu' => 1], ['name' => 'checkin/recharge/createpackage', 'title' => '添加套餐', 'ismenu' => 0], ['name' => 'checkin/recharge/deletepackage', 'title' => '删除套餐', 'ismenu' => 0], self::promotionMenu(), self::promotionSaveRule(), self::announcementMenu(), self::announcementSaveRule(), self::announcementResetRule(), self::configMenu()] as $rule) {
                 if (!AuthRule::getByName($rule['name'])) $missing[] = $rule;
             }
             if ($missing) { Menu::create($missing, 'checkin'); Menu::refresh('checkin'); }
@@ -67,6 +67,8 @@ class Checkin extends Addons
                 ['name' => 'checkin/recharge/edit', 'title' => '编辑套餐', 'ismenu' => 0],
                 ['name' => 'checkin/recharge/createpackage', 'title' => '添加套餐', 'ismenu' => 0],
                 ['name' => 'checkin/recharge/deletepackage', 'title' => '删除套餐', 'ismenu' => 0],
+                self::promotionMenu(),
+                self::promotionSaveRule(),
                 self::announcementMenu(),
                 self::announcementSaveRule(),
                 self::announcementResetRule(),
@@ -74,6 +76,9 @@ class Checkin extends Addons
             ],
         ]];
     }
+
+    private static function promotionMenu() { return ['name' => 'checkin/promotion/index', 'title' => '推广管理', 'ismenu' => 1]; }
+    private static function promotionSaveRule() { return ['name' => 'checkin/promotion/save', 'title' => '保存推广', 'ismenu' => 0]; }
 
     private static function announcementMenu() { return ['name' => 'checkin/announcement/index', 'title' => '公告管理', 'ismenu' => 1]; }
     private static function announcementSaveRule() { return ['name' => 'checkin/announcement/save', 'title' => '保存公告', 'ismenu' => 0]; }
