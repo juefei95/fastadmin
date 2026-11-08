@@ -2,6 +2,30 @@
 
 return [
     [
+        'name' => 'wechat_appid', 'title' => '微信公众号 AppID', 'type' => 'string', 'group' => '微信登录',
+        'content' => [], 'value' => '', 'rule' => '', 'msg' => '', 'tip' => '凭据全部留空时使用公共微信扫码登录插件配置。独立公众号回调地址为 /addons/remotecontrol/wechat/notify。', 'ok' => '', 'extend' => '',
+    ],
+    [
+        'name' => 'wechat_secret', 'title' => '微信公众号 AppSecret', 'type' => 'password', 'group' => '微信登录',
+        'content' => [], 'value' => '', 'rule' => '', 'msg' => '', 'tip' => '', 'ok' => '', 'extend' => '',
+    ],
+    [
+        'name' => 'wechat_token', 'title' => '微信公众号 Token', 'type' => 'password', 'group' => '微信登录',
+        'content' => [], 'value' => '', 'rule' => '', 'msg' => '', 'tip' => '', 'ok' => '', 'extend' => '',
+    ],
+    [
+        'name' => 'wechat_aes_key', 'title' => '消息加解密 EncodingAESKey', 'type' => 'password', 'group' => '微信登录',
+        'content' => [], 'value' => '', 'rule' => '', 'msg' => '', 'tip' => '明文模式可留空。', 'ok' => '', 'extend' => '',
+    ],
+    [
+        'name' => 'wechat_http_verify', 'title' => 'SSL 证书校验', 'type' => 'bool', 'group' => '微信登录',
+        'content' => [], 'value' => '1', 'rule' => '', 'msg' => '', 'tip' => '仅用于独立公众号配置。', 'ok' => '', 'extend' => '',
+    ],
+    [
+        'name' => 'wechat_http_proxy', 'title' => '微信 API HTTP 代理', 'type' => 'password', 'group' => '微信登录',
+        'content' => [], 'value' => '', 'rule' => '', 'msg' => '', 'tip' => '仅用于独立公众号配置，留空直连。', 'ok' => '', 'extend' => '',
+    ],
+    [
         'name'    => 'enable_trial',
         'title'   => '新用户体验',
         'type'    => 'bool',
