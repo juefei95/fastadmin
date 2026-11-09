@@ -4,6 +4,22 @@ return array (
   'autoload' => false,
   'hooks' => 
   array (
+    'app_init' => 
+    array (
+      0 => 'checkin',
+      1 => 'wallet',
+    ),
+    'user_delete_successed' => 
+    array (
+      0 => 'checkin',
+      1 => 'third',
+      2 => 'wallet',
+    ),
+    'user_register_successed' => 
+    array (
+      0 => 'checkin',
+      1 => 'wallet',
+    ),
     'epay_config_init' => 
     array (
       0 => 'epay',
@@ -16,11 +32,6 @@ return array (
     array (
       0 => 'epay',
       1 => 'third',
-    ),
-    'user_delete_successed' => 
-    array (
-      0 => 'third',
-      1 => 'wallet',
     ),
     'user_logout_successed' => 
     array (
@@ -37,14 +48,6 @@ return array (
     'view_filter' => 
     array (
       0 => 'third',
-    ),
-    'app_init' => 
-    array (
-      0 => 'wallet',
-    ),
-    'user_register_successed' => 
-    array (
-      0 => 'wallet',
     ),
   ),
   'route' => 
