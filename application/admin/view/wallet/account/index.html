@@ -1,0 +1,71 @@
+<style>
+.wallet-admin .wallet-toolbar{display:flex;align-items:center;gap:8px;margin:0 0 15px;flex-wrap:wrap}
+.wallet-admin .wallet-toolbar .wallet-hint{color:#8391a4;margin-left:auto}
+.wallet-admin .wallet-table{background:#fff;margin-bottom:0}
+.wallet-admin .wallet-table thead th{background:#f3f7fb;color:#45566d;border-bottom:2px solid #dce6ef;white-space:nowrap}
+.wallet-admin .wallet-table tbody tr:hover{background:#f4f9ff}
+.wallet-admin .wallet-table td,.wallet-admin .wallet-table th{vertical-align:middle}
+.wallet-admin .wallet-id{color:#67809c;font-weight:600}
+.wallet-admin .wallet-balance{display:inline-block;min-width:58px;padding:4px 10px;border-radius:12px;background:#e8f8f2;color:#16835d;font-weight:700;text-align:center}
+.wallet-admin .wallet-actions{white-space:nowrap}
+.wallet-admin .wallet-actions .btn{margin-right:4px}
+</style>
+<div class="panel panel-default panel-intro wallet-admin">
+  {:build_heading()}
+  <div class="panel-body">
+    <div class="wallet-toolbar">
+      <a class="btn btn-primary {:$auth->check('wallet/account/ledger')?'':'hide'}" href="{:url('wallet/account/ledger')}"><i class="fa fa-list"></i> 钱包流水</a>
+      <button type="button" class="btn btn-info" onclick="location.reload()" title="刷新"><i class="fa fa-refresh"></i> 刷新</button>
+      <span class="wallet-hint">在操作列查看流水或调整金币</span>
+    </div>
+    <div class="table-responsive"><table class="table table-striped table-bordered table-hover wallet-table">
+      <thead><tr><th>用户 ID</th><th>用户名</th><th>昵称</th><th>币种</th><th>余额</th><th>操作</th></tr></thead>
+      <tbody>
+      {volist name="wallets" id="row"}
+      <tr>
+        <td><span class="wallet-id">#{$row.user_id}</span></td>
+        <td><strong>{$row.username|htmlentities}</strong></td>
+        <td>{$row.nickname|htmlentities}</td>
+        <td><span class="label label-primary">{$row.currency}</span></td>
+        <td><span class="wallet-balance">{$row.balance}</span></td>
+        <td class="wallet-actions">
+          <a class="btn btn-info btn-xs {:$auth->check('wallet/account/ledger')?'':'hide'}" href="{:url('wallet/account/ledger')}?user_id={$row.user_id}" title="查看流水"><i class="fa fa-list"></i> 流水</a>
+          {if condition="$row.currency eq 'coin'"}
+          <button type="button" class="btn btn-success btn-xs js-adjust-coin {:$auth->check('wallet/account/adjust')?'':'hide'}" disabled
+                  data-user-id="{$row.user_id}" data-username="{$row.username|htmlentities}" title="调整金币">
+            <i class="fa fa-pencil"></i> 调整
+          </button>
+          {/if}
+        </td>
+      </tr>
+      {/volist}
+      </tbody>
+    </table></div>
+  </div>
+</div>
+<div class="modal fade" id="coin-adjust-modal" tabindex="-1" role="dialog" aria-labelledby="coin-adjust-title">
+  <div class="modal-dialog" role="document"><div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="关闭"><span aria-hidden="true">&times;</span></button>
+      <h4 class="modal-title" id="coin-adjust-title">调整金币</h4>
+    </div>
+    <form id="coin-adjust" action="{:url('wallet/account/adjust')}" method="post">
+      <div class="modal-body">
+        <p id="coin-adjust-user"></p>
+        <input type="hidden" name="user_id" id="coin-adjust-user-id">
+        <div class="form-group">
+          <label for="coin-adjust-amount">变动数量（正数增加，负数扣除）</label>
+          <input class="form-control" type="number" name="amount" id="coin-adjust-amount" step="1" required>
+        </div>
+        <div class="form-group">
+          <label for="coin-adjust-memo">调整原因</label>
+          <input class="form-control" type="text" name="memo" id="coin-adjust-memo" minlength="2" maxlength="100" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="submit" class="btn btn-primary">确认调整</button>
+      </div>
+    </form>
+  </div></div>
+</div>
