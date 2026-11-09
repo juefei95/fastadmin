@@ -2,6 +2,14 @@
 
 return [
     [
+        'name' => 'announcement_enabled', 'title' => '显示首页公告', 'type' => 'bool', 'group' => '公告',
+        'content' => [], 'value' => '0', 'rule' => '', 'msg' => '', 'tip' => '关闭后客户端不显示公告。', 'ok' => '', 'extend' => '',
+    ],
+    [
+        'name' => 'announcement_text', 'title' => '首页公告内容', 'type' => 'text', 'group' => '公告',
+        'content' => [], 'value' => '', 'rule' => '', 'msg' => '', 'tip' => '每行一条公告，按顺序滚动显示。', 'ok' => '', 'extend' => '',
+    ],
+    [
         'name' => 'wechat_appid', 'title' => '微信公众号 AppID', 'type' => 'string', 'group' => '微信登录',
         'content' => [], 'value' => '', 'rule' => '', 'msg' => '', 'tip' => '凭据全部留空时使用公共微信扫码登录插件配置。独立公众号回调地址为 /addons/remotecontrol/wechat/notify。', 'ok' => '', 'extend' => '',
     ],
