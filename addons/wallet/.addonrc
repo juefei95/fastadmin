@@ -1,0 +1,1 @@
+{"menus":["wallet","wallet\/account\/index","wallet\/account\/ledger","wallet\/account\/adjust"],"files":["application\/admin\/controller\/wallet\/Account.php","application\/admin\/view\/wallet\/account\/index.html","application\/admin\/view\/wallet\/account\/ledger.html","public\/assets\/js\/backend\/wallet\/account.js"]}

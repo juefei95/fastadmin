@@ -6,6 +6,7 @@
 !/addons/third/
 !/addons/wechatqrcodelogin/
 !/addons/epay/
+!/addons/wallet/
 /public/assets/libs/
 /public/assets/addons/*
 /public/uploads/*

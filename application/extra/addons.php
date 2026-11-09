@@ -20,6 +20,7 @@ return array (
     'user_delete_successed' => 
     array (
       0 => 'third',
+      1 => 'wallet',
     ),
     'user_logout_successed' => 
     array (
@@ -36,6 +37,14 @@ return array (
     'view_filter' => 
     array (
       0 => 'third',
+    ),
+    'app_init' => 
+    array (
+      0 => 'wallet',
+    ),
+    'user_register_successed' => 
+    array (
+      0 => 'wallet',
     ),
   ),
   'route' => 
