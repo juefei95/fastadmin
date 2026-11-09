@@ -4,7 +4,7 @@
 /runtime/*
 /addons/*
 !/addons/third/
-/addons/wechatqrcodelogin
+!/addons/wechatqrcodelogin
 /public/assets/libs/
 /public/assets/addons/*
 /public/uploads/*
