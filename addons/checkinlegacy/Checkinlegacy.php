@@ -1,0 +1,64 @@
+<?php
+namespace addons\checkinlegacy;
+
+use think\Addons;
+use app\common\library\Menu;
+use app\admin\model\AuthRule;
+
+class Checkinlegacy extends Addons
+{
+    private static function legacyActions()
+    {
+        return [
+            'index' => 'index',
+            'login' => 'accountlogin',
+            'wechatregister' => 'wechatregister',
+            'checkin' => 'checkin',
+            'todayrewards' => 'todayrewards',
+            'claiminvitation' => 'claiminvitation',
+            'adreward' => 'adreward',
+            'virtuallocation' => 'virtuallocation',
+            'changeusername' => 'changeusername',
+            'changepwdwithoutold' => 'changepwdwithoutold',
+        ];
+    }
+
+    public function appInit()
+    {
+        foreach (self::legacyActions() as $path => $action) {
+            \think\Route::rule('api/user/' . $path . '$',
+                '\\think\\addons\\Route@execute?addon=checkinlegacy&controller=api&action=' . $action,
+                $path === 'index' ? 'GET' : 'POST');
+        }
+    }
+
+    public function appDispatch()
+    {
+        $path = trim(\think\Request::instance()->pathinfo(), '/');
+        if (strpos($path, 'api/user/') !== 0) return;
+        $action = substr($path, strlen('api/user/'));
+        if (isset(self::legacyActions()[$action])) \think\App::route(true);
+    }
+
+    private static function ensureMenu()
+    {
+        $root = AuthRule::getByName('checkinlegacy');
+        if (!$root) {
+            Menu::create([['name' => 'checkinlegacy', 'title' => '旧版打卡签到管理', 'icon' => 'fa fa-history', 'ismenu' => 1]]);
+        } else {
+            $changes = [];
+            if (!(int)$root['ismenu']) $changes['ismenu'] = 1;
+            if ($root['title'] === '旧版打卡管理') $changes['title'] = '旧版打卡签到管理';
+            if ($changes) $root->save($changes);
+        }
+        if (!AuthRule::getByName('checkinlegacy/user/index')) {
+            Menu::create([['name' => 'checkinlegacy/user/index', 'title' => '旧版打卡用户', 'ismenu' => 1]], 'checkinlegacy');
+        }
+        Menu::refresh('checkinlegacy');
+    }
+
+    public function install() { self::ensureMenu(); return true; }
+    public function uninstall() { Menu::delete('checkinlegacy'); return true; }
+    public function enable() { self::ensureMenu(); Menu::enable('checkinlegacy'); return true; }
+    public function disable() { Menu::disable('checkinlegacy'); return true; }
+}

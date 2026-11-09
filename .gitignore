@@ -8,6 +8,7 @@
 !/addons/epay/
 !/addons/wallet/
 !/addons/checkin/
+!/addons/checkinlegacy/
 /public/assets/libs/
 /public/assets/addons/*
 /public/uploads/*

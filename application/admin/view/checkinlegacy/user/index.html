@@ -1,0 +1,18 @@
+{include file="checkin/common/style" /}
+<div class="panel panel-default panel-intro checkin-page">
+    {:build_heading()}
+    <div class="panel-body">
+        <div class="checkin-toolbar">
+            <div class="toolbar-left"><button class="btn btn-default" type="button" onclick="location.reload()" title="刷新"><i class="fa fa-refresh"></i></button><span class="checkin-caption">旧版小程序绑定记录 · 会员账号由会员管理维护</span></div>
+            <form method="get"><input class="form-control" name="keyword" value="{$keyword|htmlentities}" placeholder="会员 ID 或用户名"><button class="btn btn-primary" type="submit"><i class="fa fa-search"></i> 查询</button><a class="btn btn-default" href="{:url('checkinlegacy/user/index')}">重置</a></form>
+        </div>
+        <div class="table-responsive"><table class="table table-striped table-bordered table-hover checkin-table">
+            <thead><tr><th>绑定 ID</th><th>会员 ID</th><th>用户名</th><th>昵称</th><th>会员状态</th><th>绑定时间</th></tr></thead>
+            <tbody>{volist name="users" id="row"}<tr>
+                <td>{$row.id}</td><td class="checkin-id">{$row.user_id}</td><td class="checkin-strong">{$row.username|default='—'|htmlentities}</td><td>{$row.nickname|default='—'|htmlentities}</td>
+                <td>{if condition="$row.status eq 'normal'"}<span class="checkin-badge ok">● 正常</span>{elseif condition="empty($row.status)" /}<span class="checkin-badge off">会员不存在</span>{else /}<span class="checkin-badge off">{$row.status|htmlentities}</span>{/if}</td>
+                <td>{if condition="!empty($row.createtime)"}{$row.createtime|date='Y-m-d H:i:s',###}{else /}—{/if}</td>
+            </tr>{/volist}{empty name="users"}<tr><td class="checkin-empty" colspan="6">暂无旧版打卡用户</td></tr>{/empty}</tbody>
+        </table></div>{$pager}
+    </div>
+</div>
