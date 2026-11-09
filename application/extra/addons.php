@@ -25,6 +25,14 @@ return array (
     array (
       0 => 'checkinlegacy',
     ),
+    'config' => 
+    array (
+      0 => 'code2yellow',
+    ),
+    'upgrade' => 
+    array (
+      0 => 'code2yellow',
+    ),
     'epay_config_init' => 
     array (
       0 => 'epay',

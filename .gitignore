@@ -9,6 +9,7 @@
 !/addons/wallet/
 !/addons/checkin/
 !/addons/checkinlegacy/
+!/addons/code2yellow/
 /public/assets/libs/
 /public/assets/addons/*
 /public/uploads/*
