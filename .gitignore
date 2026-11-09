@@ -10,6 +10,7 @@
 !/addons/checkin/
 !/addons/checkinlegacy/
 !/addons/code2yellow/
+!/addons/remotecontrol/
 /public/assets/libs/
 /public/assets/addons/*
 /public/uploads/*

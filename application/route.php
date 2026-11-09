@@ -1,5 +1,7 @@
 <?php
 
+use think\Route;
+
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
@@ -9,6 +11,11 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+
+
+Route::post('api/heartbeat', 'api/remote/heartbeat');
+Route::post('api/sysinfo', 'api/remote/sysinfo');
+Route::post('api/sysinfo_ver', 'api/remote/sysinfover');
 
 return [
     //别名配置,别名只能是映射到控制器且访问时必须加上请求的方法

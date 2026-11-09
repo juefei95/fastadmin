@@ -1,0 +1,107 @@
+CREATE TABLE IF NOT EXISTS `__PREFIX__remote_member` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `expire_time` bigint(16) DEFAULT NULL COMMENT '远控到期时间',
+  `trial_given` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否领取体验:0=否,1=是',
+  `trial_started_at` bigint(16) DEFAULT NULL COMMENT '体验领取时间',
+  `control_enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '控制权限:0=禁用,1=启用',
+  `last_paid_at` bigint(16) DEFAULT NULL COMMENT '最近付费时间',
+  `total_paid` decimal(10,2) unsigned NOT NULL DEFAULT '0.00' COMMENT '累计消费',
+  `created_at` bigint(16) DEFAULT NULL COMMENT '创建时间',
+  `updated_at` bigint(16) DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`),
+  KEY `expire_time` (`expire_time`),
+  KEY `control_enabled` (`control_enabled`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='远控用户权益表';
+
+CREATE TABLE IF NOT EXISTS `__PREFIX__remote_package` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `name` varchar(50) NOT NULL DEFAULT '' COMMENT '套餐名称',
+  `days` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '套餐天数',
+  `price` decimal(10,2) unsigned NOT NULL DEFAULT '0.00' COMMENT '优惠价',
+  `original_price` decimal(10,2) unsigned NOT NULL DEFAULT '0.00' COMMENT '原价',
+  `recommended` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否推荐:0=否,1=是',
+  `status` varchar(30) NOT NULL DEFAULT 'normal' COMMENT '状态',
+  `weigh` int(10) NOT NULL DEFAULT '0' COMMENT '权重',
+  `description` varchar(255) NOT NULL DEFAULT '' COMMENT '客户端展示文案',
+  `createtime` bigint(16) DEFAULT NULL COMMENT '创建时间',
+  `updatetime` bigint(16) DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `status` (`status`),
+  KEY `weigh` (`weigh`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='远控套餐表';
+
+CREATE TABLE IF NOT EXISTS `__PREFIX__remote_order` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `order_no` varchar(64) NOT NULL DEFAULT '' COMMENT '订单号',
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `package_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '套餐ID',
+  `package_name` varchar(50) NOT NULL DEFAULT '' COMMENT '套餐名称',
+  `days` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '套餐天数',
+  `amount` decimal(10,2) unsigned NOT NULL DEFAULT '0.00' COMMENT '订单金额',
+  `pay_type` varchar(30) NOT NULL DEFAULT '' COMMENT '支付方式',
+  `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '状态:0=待支付,1=已支付,2=已关闭,3=已退款',
+  `paid_at` bigint(16) DEFAULT NULL COMMENT '支付时间',
+  `createtime` bigint(16) DEFAULT NULL COMMENT '创建时间',
+  `updatetime` bigint(16) DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `order_no` (`order_no`),
+  KEY `user_id` (`user_id`),
+  KEY `package_id` (`package_id`),
+  KEY `status` (`status`),
+  KEY `paid_at` (`paid_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='远控订单表';
+
+CREATE TABLE IF NOT EXISTS `__PREFIX__remote_device` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `device_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'RustDesk设备ID',
+  `device_uuid` varchar(128) NOT NULL DEFAULT '' COMMENT '设备UUID',
+  `client_version` varchar(64) NOT NULL DEFAULT '' COMMENT '客户端版本',
+  `hostname` varchar(255) NOT NULL DEFAULT '' COMMENT '主机名',
+  `username` varchar(255) NOT NULL DEFAULT '' COMMENT '用户名',
+  `connection_count` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '活动连接数',
+  `last_seen_at` bigint(16) DEFAULT NULL COMMENT '最后心跳时间',
+  `sysinfo` mediumtext COMMENT '客户端系统信息',
+  `sysinfo_updated_at` bigint(16) DEFAULT NULL COMMENT '系统信息更新时间',
+  `created_at` bigint(16) DEFAULT NULL COMMENT '创建时间',
+  `updated_at` bigint(16) DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `device_id` (`device_id`),
+  KEY `last_seen_at` (`last_seen_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='远控客户端设备心跳表';
+
+CREATE TABLE IF NOT EXISTS `__PREFIX__remote_login_device` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `device_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'RustDesk设备ID',
+  `device_uuid` varchar(128) NOT NULL DEFAULT '' COMMENT '设备UUID',
+  `token` varchar(64) NOT NULL DEFAULT '' COMMENT '登录令牌',
+  `created_at` bigint(16) DEFAULT NULL COMMENT '首次登录时间',
+  `updated_at` bigint(16) DEFAULT NULL COMMENT '更新时间',
+  `last_login_at` bigint(16) DEFAULT NULL COMMENT '最近登录时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_device_uuid` (`user_id`,`device_uuid`),
+  UNIQUE KEY `token` (`token`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='远控账号登录设备表';
+
+CREATE TABLE IF NOT EXISTS `__PREFIX__remote_rdp_tunnel` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `device_id` varchar(64) NOT NULL DEFAULT '' COMMENT 'RustDesk设备ID',
+  `proxy_name` varchar(128) NOT NULL DEFAULT '' COMMENT 'FRP代理名称',
+  `public_port` int(10) unsigned DEFAULT NULL COMMENT 'FRP公网端口',
+  `status` varchar(20) NOT NULL DEFAULT 'inactive' COMMENT '状态:inactive=未启用,allocated=已分配,active=运行中,stopping=等待客户端FRPC断开',
+  `last_error` varchar(255) NOT NULL DEFAULT '' COMMENT '最近错误',
+  `created_at` bigint(16) DEFAULT NULL COMMENT '创建时间',
+  `updated_at` bigint(16) DEFAULT NULL COMMENT '更新时间',
+  `activated_at` bigint(16) DEFAULT NULL COMMENT '启用时间',
+  `deactivated_at` bigint(16) DEFAULT NULL COMMENT '停用时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_device` (`user_id`,`device_id`),
+  KEY `proxy_name` (`proxy_name`),
+  UNIQUE KEY `public_port` (`public_port`),
+  KEY `status` (`status`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Windows远程桌面FRP映射表';

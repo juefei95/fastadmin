@@ -32,6 +32,7 @@ return array (
     'upgrade' => 
     array (
       0 => 'code2yellow',
+      1 => 'remotecontrol',
     ),
     'epay_config_init' => 
     array (

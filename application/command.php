@@ -17,4 +17,6 @@ return [
     'app\admin\command\Min',
     'app\admin\command\Addon',
     'app\admin\command\Api',
+    'app\admin\command\RemoteOrder',
+    'app\admin\command\RemoteRdpTunnel',
 ];
