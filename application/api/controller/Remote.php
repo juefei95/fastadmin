@@ -69,8 +69,8 @@ class Remote extends remote\Index
             'relay_server'   => (string)($config['relay_server'] ?? ''),
             'api_server'     => (string)($config['api_server'] ?? ''),
             'public_key'     => (string)($config['public_key'] ?? ''),
-            'latest_version' => (string)($config['latest_version'] ?? ''),
-            'min_version'    => (string)($config['min_version'] ?? ''),
+            'update_url'     => (string)($config['update_url'] ?? ''),
+            'official_url'   => (string)($config['official_url'] ?? ''),
         ]);
     }
 
