@@ -1,15 +1,15 @@
-name: fastadmin-ld-debug
+name: fastadmin-all-plugin-debug
 
 services:
   web:
     image: webdevops/php-dev:7.4
-    container_name: fastadmin-ld-debug-web
+    container_name: fastadmin-all-plugin-debug-web
     extra_hosts:
       - "host.docker.internal:host-gateway"
     working_dir: /app
     command: php -S 0.0.0.0:8000 -t public
     ports:
-      - "5191:8000"
+      - "5101:8000"
     volumes:
       - ../:/app
       - ./xdebug.ini:/usr/local/etc/php/conf.d/99-xdebug.ini
@@ -28,7 +28,7 @@ services:
 
       DATABASE_TYPE: mysql
       DATABASE_HOSTNAME: mysql
-      DATABASE_DATABASE: lindiandata
+      DATABASE_DATABASE: allplugindata
       DATABASE_USERNAME: root
       DATABASE_PASSWORD: root
       DATABASE_HOSTPORT: "3306"
@@ -40,17 +40,17 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: fastadmin-ld-debug-mysql
+    container_name: fastadmin-all-plugin-debug-mysql
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --sql-mode=NO_ENGINE_SUBSTITUTION
     volumes:
-      - fastadmin-ld-debug-mysql-data:/var/lib/mysql
+      - fastadmin-all-plugin-debug-mysql-data:/var/lib/mysql
       #- ../application/admin/command/Install/fastadmin.sql:/docker-entrypoint-initdb.d/fastadmin.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: lindiandata
+      MYSQL_DATABASE: allplugindata
       MYSQL_USER: fastadmin
       MYSQL_PASSWORD: fastadmin
       TZ: Asia/Shanghai
@@ -62,9 +62,9 @@ services:
 
   phpmyadmin:
     image: phpmyadmin:5
-    container_name: fastadmin-ld-debug-phpmyadmin
+    container_name: fastadmin-all-plugin-debug-phpmyadmin
     ports:
-      - "5192:80"
+      - "5102:80"
     environment:
       PMA_HOST: mysql
       PMA_PORT: "3306"
@@ -77,4 +77,4 @@ services:
 
 
 volumes:
-  fastadmin-ld-debug-mysql-data:
+  fastadmin-all-plugin-debug-mysql-data:
