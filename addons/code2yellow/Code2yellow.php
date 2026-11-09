@@ -55,6 +55,25 @@ class Code2yellow extends Addons
             ['name' => 'code2yellow/config', 'title' => '插件设置', 'icon' => 'fa fa-cog', 'url' => 'addon/config?name=code2yellow', 'ismenu' => 1, 'menutype' => 'addtabs']
         ]]];
     }
+    public function config($name, $config)
+    {
+        $required = [
+            'yellow_zone_share' => '绿区访问的共享目录',
+            'yellow_zone_username' => '绿区访问共享目录的用户名',
+            'yellow_zone_password' => '绿区访问共享目录的密码',
+        ];
+        $values = [];
+        foreach ($config as $item) {
+            $values[$item['name']] = $item['value'];
+        }
+        foreach ($required as $key => $title) {
+            if (trim((string)($values[$key] ?? '')) === '') {
+                throw new \Exception('请填写' . $title);
+            }
+        }
+        set_addon_fullconfig($name, $config);
+        \think\addons\Service::refresh();
+    }
     public function install() { $this->setup(); Menu::create($this->menu()); return true; }
     public function enable() { $this->setup(); Menu::upgrade('code2yellow', $this->menu()); Menu::enable('code2yellow'); return true; }
     public function upgrade() { $this->setup(); if (!Menu::upgrade('code2yellow', $this->menu())) { throw new \think\Exception('更新 Code2Yellow 菜单失败'); } return true; }

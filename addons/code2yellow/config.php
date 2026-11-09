@@ -104,8 +104,20 @@ return array (
     'value' => '',
     'rule' => '',
     'msg' => '',
-    'tip' => '留空使用默认地址。客户端通过此 HTTPS 地址检查最新版本，清单需包含 version 和 windows.url。',
+    'tip' => '填写 stable.json 的 HTTPS 完整地址，例如 https://lddownload.zhenhaiedu.top/code2yellow/stable.json；留空使用该默认地址。清单需包含 version 和 windows.url。',
     'ok' => '',
     'extend' => '',
+  ),
+  7 => array (
+    'name' => 'yellow_zone_share', 'title' => '绿区访问的共享目录', 'type' => 'string', 'content' => array (),
+    'value' => '', 'rule' => 'required', 'msg' => '', 'tip' => '填写 Windows UNC 共享路径，例如 \\\\192.168.199.86\\Work Zone Bimbase Share；请填写共享路径。修改后请重启客户端。', 'ok' => '', 'extend' => '',
+  ),
+  9 => array (
+    'name' => 'yellow_zone_username', 'title' => '绿区访问共享目录的用户名', 'type' => 'string', 'content' => array (),
+    'value' => '', 'rule' => 'required', 'msg' => '', 'tip' => '必填，例如 gq_bimbase。修改后请重新登录客户端。', 'ok' => '', 'extend' => '',
+  ),
+  8 => array (
+    'name' => 'yellow_zone_password', 'title' => '绿区访问共享目录的密码', 'type' => 'password', 'content' => array (),
+    'value' => '', 'rule' => 'required', 'msg' => '', 'tip' => '必填，例如 bimbase@123。修改后请重新登录客户端。', 'ok' => '', 'extend' => '',
   ),
 );

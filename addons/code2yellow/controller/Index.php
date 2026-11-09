@@ -44,6 +44,18 @@ class Index extends Api
         $this->success('ok', $result);
     }
 
+    public function shareconfig()
+    {
+        $config = (array)get_addon_config('code2yellow');
+        $yellow = trim((string)($config['yellow_zone_share'] ?? ''));
+        header('Cache-Control: no-store');
+        $this->success('ok', [
+            'yellow_zone_share' => $yellow,
+            'yellow_zone_username' => (string)($config['yellow_zone_username'] ?? ''),
+            'yellow_zone_password' => (string)($config['yellow_zone_password'] ?? ''),
+        ]);
+    }
+
     public function updateconfig()
     {
         $config = (array)get_addon_config('code2yellow');
