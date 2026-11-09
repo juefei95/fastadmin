@@ -7,7 +7,8 @@ return array (
     'app_init' => 
     array (
       0 => 'checkin',
-      1 => 'wallet',
+      1 => 'checkinlegacy',
+      2 => 'wallet',
     ),
     'user_delete_successed' => 
     array (
@@ -19,6 +20,10 @@ return array (
     array (
       0 => 'checkin',
       1 => 'wallet',
+    ),
+    'app_dispatch' => 
+    array (
+      0 => 'checkinlegacy',
     ),
     'epay_config_init' => 
     array (
