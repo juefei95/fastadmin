@@ -38,6 +38,10 @@ return array (
       0 => 'epay',
       1 => 'third',
     ),
+    'upgrade' => 
+    array (
+      0 => 'remotecontrol',
+    ),
     'user_logout_successed' => 
     array (
       0 => 'third',
