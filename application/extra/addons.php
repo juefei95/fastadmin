@@ -4,6 +4,19 @@ return array (
   'autoload' => false,
   'hooks' => 
   array (
+    'epay_config_init' => 
+    array (
+      0 => 'epay',
+    ),
+    'addon_action_begin' => 
+    array (
+      0 => 'epay',
+    ),
+    'action_begin' => 
+    array (
+      0 => 'epay',
+      1 => 'third',
+    ),
     'user_delete_successed' => 
     array (
       0 => 'third',
@@ -13,10 +26,6 @@ return array (
       0 => 'third',
     ),
     'module_init' => 
-    array (
-      0 => 'third',
-    ),
-    'action_begin' => 
     array (
       0 => 'third',
     ),
