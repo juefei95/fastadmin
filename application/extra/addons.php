@@ -25,6 +25,15 @@ return array (
     array (
       0 => 'checkinlegacy',
     ),
+    'config' => 
+    array (
+      0 => 'code2yellow',
+    ),
+    'upgrade' => 
+    array (
+      0 => 'code2yellow',
+      1 => 'remotecontrol',
+    ),
     'epay_config_init' => 
     array (
       0 => 'epay',
@@ -37,10 +46,6 @@ return array (
     array (
       0 => 'epay',
       1 => 'third',
-    ),
-    'upgrade' => 
-    array (
-      0 => 'remotecontrol',
     ),
     'user_logout_successed' => 
     array (
