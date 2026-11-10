@@ -58,7 +58,7 @@ class Checkin extends Addons
         } else {
             if (($root['title'] ?? '') === '打卡管理') $root->save(['title' => '打卡签到管理']);
             $missing = [];
-            foreach ([['name' => 'checkin/user/index', 'title' => '打卡用户', 'ismenu' => 1], ['name' => 'checkin/recharge/createpackage', 'title' => '添加套餐', 'ismenu' => 0], ['name' => 'checkin/recharge/deletepackage', 'title' => '删除套餐', 'ismenu' => 0], self::promotionMenu(), self::promotionSaveRule(), self::announcementMenu(), self::announcementSaveRule(), self::announcementResetRule(), self::configMenu()] as $rule) {
+            foreach ([['name' => 'checkin/user/index', 'title' => '打卡用户', 'ismenu' => 1], ['name' => 'checkin/recharge/createpackage', 'title' => '添加套餐', 'ismenu' => 0], ['name' => 'checkin/recharge/deletepackage', 'title' => '删除套餐', 'ismenu' => 0], self::verifyOrderRule(), self::closeOrderRule(), self::promotionMenu(), self::promotionSaveRule(), self::announcementMenu(), self::announcementSaveRule(), self::announcementResetRule(), self::configMenu()] as $rule) {
                 if (!AuthRule::getByName($rule['name'])) $missing[] = $rule;
             }
             if ($missing) { Menu::create($missing, 'checkin'); Menu::refresh('checkin'); }
@@ -76,6 +76,8 @@ class Checkin extends Addons
                 ['name' => 'checkin/user/index', 'title' => '打卡用户', 'ismenu' => 1],
                 ['name' => 'checkin/recharge/index', 'title' => '充值套餐', 'ismenu' => 1],
                 ['name' => 'checkin/recharge/orders', 'title' => '充值订单', 'ismenu' => 1],
+                self::verifyOrderRule(),
+                self::closeOrderRule(),
                 ['name' => 'checkin/recharge/edit', 'title' => '编辑套餐', 'ismenu' => 0],
                 ['name' => 'checkin/recharge/createpackage', 'title' => '添加套餐', 'ismenu' => 0],
                 ['name' => 'checkin/recharge/deletepackage', 'title' => '删除套餐', 'ismenu' => 0],
@@ -89,6 +91,8 @@ class Checkin extends Addons
         ]];
     }
 
+    private static function verifyOrderRule() { return ['name' => 'checkin/recharge/verifyorder', 'title' => '核对微信订单', 'ismenu' => 0]; }
+    private static function closeOrderRule() { return ['name' => 'checkin/recharge/closeorder', 'title' => '关闭充值订单', 'ismenu' => 0]; }
     private static function promotionMenu() { return ['name' => 'checkin/promotion/index', 'title' => '推广管理', 'ismenu' => 1]; }
     private static function promotionSaveRule() { return ['name' => 'checkin/promotion/save', 'title' => '保存推广', 'ismenu' => 0]; }
 

@@ -206,6 +206,25 @@ class Api extends BaseApi
         $this->success('', $order);
     }
 
+    public function cancelrechargeorder()
+    {
+        if (!$this->request->isPost()) $this->error('请求方法错误');
+        $orderNo = trim((string)$this->request->post('order_no', ''));
+        if (!preg_match('/^[A-Za-z0-9_-]{1,64}$/D', $orderNo)) $this->error('订单号无效');
+        $order = Db::name('checkin_recharge_order')->where('user_id', $this->auth->id)->where('order_no', $orderNo)->find();
+        if (!$order) $this->error('订单不存在');
+        if ($order['status'] === 'pending') {
+            try { RechargeQuery::close($order); }
+            catch (\Throwable $e) {
+                \think\Log::record('checkin recharge close failed: ' . get_class($e), 'error');
+                $this->error('无法确认订单状态，请稍后查询或重试');
+            }
+            $order = Db::name('checkin_recharge_order')->where('user_id', $this->auth->id)->where('order_no', $orderNo)->find();
+        }
+        if (!in_array($order['status'] ?? '', ['paid', 'closed'], true)) $this->error('无法确认订单状态，请稍后查询或重试');
+        $this->success('', ['order_no' => $orderNo, 'status' => $order['status'], 'score' => Wallet::balance($this->auth->id)]);
+    }
+
     public function changeusername()
     {
         if (!$this->request->isPost()) $this->error('请求方法错误');

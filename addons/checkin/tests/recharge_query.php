@@ -5,10 +5,11 @@ namespace think {
         public static function name($name) { return new Query; }
     }
     class Query {
-        public function where($k, $v) { return $this; }
+        private $conditions = [];
+        public function where($k, $v) { $this->conditions[$k] = $v; return $this; }
         public function lock($v) { return $this; }
         public function find() { return Db::$order; }
-        public function update($data) { Db::$order = array_merge(Db::$order, $data); }
+        public function update($data) { foreach ($this->conditions as $key => $value) if ((Db::$order[$key] ?? null) !== $value) return 0; Db::$order = array_merge(Db::$order, $data); return 1; }
     }
 }
 namespace addons\wallet\library { class Wallet { public static $count = 0; public static function change(...$args) { self::$count++; } } }
@@ -20,7 +21,7 @@ namespace addons\epay\library {
     }
 }
 namespace Yansongda\Pay {
-    class Pay { public static $data; public static function wechat($config) { return new self; } public function find(...$args) { if (self::$data === false) throw new \RuntimeException('query failed'); return self::$data; } }
+    class Pay { public static $data; public static $closeResult; public static function wechat($config) { return new self; } public function find(...$args) { if (self::$data === false) throw new \RuntimeException('query failed'); return self::$data; } public function close($order) { if (self::$closeResult === false) throw new \RuntimeException('close failed'); return self::$closeResult; } }
 }
 namespace {
     function cache($key, $value = null, $ttl = null) { if ($value === null) return $GLOBALS['cache'][$key] ?? null; $GLOBALS['cache'][$key] = $value; }
@@ -38,6 +39,15 @@ namespace {
         \Yansongda\Pay\Pay::$data = $response; $GLOBALS['cache'] = [];
         \addons\checkin\library\RechargeQuery::reconcile($order);
         if (\think\Db::$order['status'] !== 'pending') throw new \RuntimeException('unpaid settled');
+        $response['trade_state'] = 'CLOSED'; $GLOBALS['cache'] = []; \Yansongda\Pay\Pay::$data = $response;
+        \addons\checkin\library\RechargeQuery::reconcile($order);
+        if (\think\Db::$order['status'] !== 'closed') throw new \RuntimeException('closed order not synchronized');
+        $GLOBALS['cache'] = []; \addons\checkin\library\RechargeQuery::reconcile($order);
+        if (\think\Db::$order['status'] !== 'closed') throw new \RuntimeException('repeated closed query changed order');
+        $GLOBALS['cache'] = []; \think\Db::$order['status'] = 'paid';
+        \addons\checkin\library\RechargeQuery::reconcile($order);
+        if (\think\Db::$order['status'] !== 'paid') throw new \RuntimeException('closed query overwrote paid order');
+        \think\Db::$order = $order;
         $response['trade_state'] = 'SUCCESS'; $GLOBALS['cache'] = []; $response['out_trade_no'] = 'other'; \Yansongda\Pay\Pay::$data = $response;
         try { \addons\checkin\library\RechargeQuery::reconcile($order); throw new \LogicException('wrong order accepted'); } catch (\RuntimeException $e) {}
         $response['out_trade_no'] = 'test-order'; $GLOBALS['cache'] = []; \Yansongda\Pay\Pay::$data = $response;
@@ -47,6 +57,15 @@ namespace {
         \think\Db::$order = $order; $GLOBALS['cache'] = []; \Yansongda\Pay\Pay::$data = false;
         try { \addons\checkin\library\RechargeQuery::reconcile($order); throw new \LogicException('failed query accepted'); } catch (\RuntimeException $e) {}
         if (\think\Db::$order['status'] !== 'pending') throw new \RuntimeException('failed query settled');
+        \Yansongda\Pay\Pay::$closeResult = $version === 'v2' ? ['return_code'=>'SUCCESS','result_code'=>'SUCCESS'] : null;
+        \addons\checkin\library\RechargeQuery::close($order);
+        if (\think\Db::$order['status'] !== 'closed') throw new \RuntimeException('close not persisted');
+        \think\Db::$order = $order; \Yansongda\Pay\Pay::$closeResult = false; \Yansongda\Pay\Pay::$data = false;
+        try { \addons\checkin\library\RechargeQuery::close($order); throw new \LogicException('uncertain close accepted'); } catch (\RuntimeException $e) {}
+        if (\think\Db::$order['status'] !== 'pending') throw new \RuntimeException('uncertain close changed order');
+        \Yansongda\Pay\Pay::$data = $response; $GLOBALS['cache'] = []; \addons\wallet\library\Wallet::$count = 0;
+        \addons\checkin\library\RechargeQuery::close($order);
+        if (\think\Db::$order['status'] !== 'paid' || \addons\wallet\library\Wallet::$count !== 1) throw new \RuntimeException('paid close not settled');
     }
-    echo "PASS: v2/v3 pending, mismatch, settlement, duplicate, query failure\n";
+    echo "PASS: v2/v3 pending, mismatch, settlement, duplicate, query failure and close outcomes\n";
 }
