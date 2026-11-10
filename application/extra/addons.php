@@ -4,6 +4,11 @@ return array (
   'autoload' => false,
   'hooks' => 
   array (
+    'config' => 
+    array (
+      0 => 'checkin',
+      1 => 'code2yellow',
+    ),
     'app_init' => 
     array (
       0 => 'checkin',
@@ -24,10 +29,6 @@ return array (
     'app_dispatch' => 
     array (
       0 => 'checkinlegacy',
-    ),
-    'config' => 
-    array (
-      0 => 'code2yellow',
     ),
     'upgrade' => 
     array (
