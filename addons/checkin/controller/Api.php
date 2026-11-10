@@ -4,6 +4,7 @@ namespace addons\checkin\controller;
 use addons\wallet\library\Wallet;
 use addons\checkin\library\SpringFestival;
 use addons\checkin\library\RewardService;
+use addons\checkin\library\RechargeQuery;
 use addons\third\library\Service;
 use addons\third\model\Third;
 use app\common\controller\Api as BaseApi;
@@ -190,6 +191,17 @@ class Api extends BaseApi
         $order = Db::name('checkin_recharge_order')->where('user_id', $this->auth->id)->where('order_no', $orderNo)
             ->field('order_no,coins,price_fen,pay_type,status,createtime,paidtime')->find();
         if (!$order) $this->error('订单不存在');
+        if ($order['status'] === 'pending' && $order['pay_type'] === 'wechat') {
+            try {
+                $identity = Db::name('checkin_recharge_order')->where('user_id', $this->auth->id)->where('order_no', $orderNo)
+                    ->field('order_no,status,pay_type,payment_appid,merchant_id')->find();
+                if ($identity) RechargeQuery::reconcile($identity);
+                $order = Db::name('checkin_recharge_order')->where('user_id', $this->auth->id)->where('order_no', $orderNo)
+                    ->field('order_no,coins,price_fen,pay_type,status,createtime,paidtime')->find();
+            } catch (\Throwable $e) {
+                \think\Log::record('checkin recharge query failed: ' . get_class($e), 'error');
+            }
+        }
         $order['score'] = Wallet::balance($this->auth->id);
         $this->success('', $order);
     }
