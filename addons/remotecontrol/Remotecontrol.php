@@ -11,6 +11,18 @@ use think\Db;
  */
 class Remotecontrol extends Addons
 {
+    public function config($name, $config)
+    {
+        foreach ($config as $item) {
+            if ($item['name'] === 'payment_notify_url' && is_string($item['value']) && trim($item['value']) !== '') {
+                set_addon_fullconfig($name, $config);
+                \think\addons\Service::refresh();
+                return;
+            }
+        }
+        throw new \Exception('支付回调地址不能为空');
+    }
+
     /**
      * 插件安装方法
      * @return bool

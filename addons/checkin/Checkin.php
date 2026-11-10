@@ -9,6 +9,18 @@ use think\Db;
 
 class Checkin extends Addons
 {
+    public function config($name, $config)
+    {
+        foreach ($config as $item) {
+            if ($item['name'] === 'payment_notify_url' && is_string($item['value']) && trim($item['value']) !== '') {
+                set_addon_fullconfig($name, $config);
+                \think\addons\Service::refresh();
+                return;
+            }
+        }
+        throw new \Exception('微信支付回调地址不能为空');
+    }
+
     public function appInit()
     {
         foreach ([\app\common\model\User::class, \app\admin\model\User::class] as $userModel) {
