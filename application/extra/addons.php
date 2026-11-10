@@ -8,6 +8,7 @@ return array (
     array (
       0 => 'checkin',
       1 => 'code2yellow',
+      2 => 'remotecontrol',
     ),
     'app_init' => 
     array (
