@@ -3,6 +3,7 @@ namespace app\admin\controller\checkin;
 
 use app\common\controller\Backend;
 use think\Db;
+use addons\checkin\library\RechargeQuery;
 
 class Recharge extends Backend
 {
@@ -25,6 +26,52 @@ class Recharge extends Backend
         $this->view->assign('pager', $page->render());
         $this->view->assign('keyword', $keyword);
         return $this->view->fetch();
+    }
+
+    public function verifyorder()
+    {
+        if (!$this->request->isPost()) $this->error('请求方法错误');
+        $this->token();
+        $orderNo = trim((string)$this->request->post('order_no', ''));
+        if (!preg_match('/^[A-Za-z0-9_-]{1,64}$/D', $orderNo)) $this->error('订单号无效');
+        $order = Db::name('checkin_recharge_order')->where('order_no', $orderNo)->find();
+        if (!$order) $this->error('订单不存在');
+        if ($order['status'] === 'paid') $this->success('订单已支付并到账');
+        if ($order['status'] !== 'pending' || $order['pay_type'] !== 'wechat') $this->error('该订单不能查询微信支付');
+        try {
+            $result = RechargeQuery::reconcile($order);
+            $current = Db::name('checkin_recharge_order')->where('order_no', $orderNo)->find();
+        } catch (\Throwable $e) {
+            \think\Log::record('checkin recharge admin query failed: ' . get_class($e), 'error');
+            $this->error('微信查单或核对失败，请检查支付配置和服务器日志');
+        }
+        if ($current && $current['status'] === 'paid') $this->success('微信支付已核实，金币已到账');
+        if ($current && $current['status'] === 'closed') $this->success('微信订单已关闭');
+        if ($result === 'throttled') $this->success('查询过于频繁，请稍后重试');
+        $this->success('微信尚未确认支付成功，订单保持待支付');
+    }
+
+    public function closeorder()
+    {
+        if (!$this->request->isPost()) $this->error('请求方法错误');
+        $this->token();
+        $orderNo = trim((string)$this->request->post('order_no', ''));
+        if (!preg_match('/^[A-Za-z0-9_-]{1,64}$/D', $orderNo)) $this->error('订单号无效');
+        $order = Db::name('checkin_recharge_order')->where('order_no', $orderNo)->find();
+        if (!$order) $this->error('订单不存在');
+        if ($order['status'] === 'paid') $this->success('订单已支付并到账，未关闭');
+        if ($order['status'] === 'closed') $this->success('订单已关闭');
+        if ($order['status'] !== 'pending' || $order['pay_type'] !== 'wechat') $this->error('该订单不能关闭');
+        try {
+            RechargeQuery::close($order);
+            $current = Db::name('checkin_recharge_order')->where('order_no', $orderNo)->find();
+        } catch (\Throwable $e) {
+            \think\Log::record('checkin recharge admin close failed: ' . get_class($e), 'error');
+            $this->error('无法确认订单状态，请稍后核对');
+        }
+        if (($current['status'] ?? '') === 'paid') $this->success('订单已支付并到账，未关闭');
+        if (($current['status'] ?? '') === 'closed') $this->success('订单已关闭');
+        $this->error('无法确认订单状态，请稍后核对');
     }
 
     public function edit($ids = null)
