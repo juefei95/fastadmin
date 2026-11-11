@@ -21,7 +21,7 @@ return array (
   array (
     'name' => 'wxapp_secret',
     'title' => '微信小程序 AppSecret',
-    'type' => 'password',
+    'type' => 'string',
     'value' => '',
     'content' => 
     array (
@@ -152,7 +152,7 @@ return array (
     'name' => 'payment_wechat_enabled',
     'title' => '微信支付开关',
     'type' => 'switch',
-    'value' => '1',
+    'value' => '0',
     'content' => 
     array (
     ),
@@ -184,7 +184,7 @@ return array (
     'name' => 'payment_notify_url',
     'title' => '微信支付回调地址',
     'type' => 'string',
-    'value' => '',
+    'value' => 'https://wxdev2.zhenhaiedu.top/addons/checkin/payment/wechatnotify',
     'content' => 
     array (
     ),
