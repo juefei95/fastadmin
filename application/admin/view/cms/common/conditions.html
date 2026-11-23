@@ -1,0 +1,40 @@
+<style>
+    #subtype {
+        background:#fcf8e3;padding:15px 0 5px 0;margin-bottom:15px;
+    }
+
+    #subtype .fieldlist {
+        margin-bottom:0;
+    }
+</style>
+<script type="text/html" id="selectpagetpl">
+    <tr class="form-inline">
+        <td>
+            <select name="<%=name%>[<%=index%>][field]" class="form-control selectpicker selectpicker-field" style="width:220px;" data-live-search="true" data-width="220px" data-value="<%=row.field%>"></select>
+        </td>
+        <td>
+            <select name="<%=name%>[<%=index%>][operate]" class="form-control selectpicker selectpicker-operate" style="width:70px;" data-width="70px" data-value="<%=row.operate%>"></select>
+        </td>
+        <td><input type="text" name="<%=name%>[<%=index%>][value]" class="form-control" value="<%=row.value%>" placeholder="筛选值"/></td>
+        <td>
+            <span class="btn btn-sm btn-danger btn-remove"><i class="fa fa-times"></i></span>
+            <span class="btn btn-sm btn-primary btn-dragsort"><i class="fa fa-arrows"></i></span>
+        </td>
+    </tr>
+</script>
+
+<script type="text/html" id="favisibletpl">
+    <tr class="form-inline">
+        <td>
+            <select name="<%=name%>[<%=index%>][field]" class="form-control selectpicker selectpicker-field" style="width:220px;" data-live-search="true" data-width="220px" data-value="<%=row.field%>"></select>
+        </td>
+        <td>
+            <select name="<%=name%>[<%=index%>][operate]" class="form-control selectpicker selectpicker-operate" style="width:70px;" data-width="70px" data-value="<%=row.operate%>"></select>
+        </td>
+        <td><input type="text" name="<%=name%>[<%=index%>][value]" class="form-control" value="<%=row.value%>" placeholder="条件值"/></td>
+        <td>
+            <span class="btn btn-sm btn-danger btn-remove"><i class="fa fa-times"></i></span>
+            <span class="btn btn-sm btn-primary btn-dragsort"><i class="fa fa-arrows"></i></span>
+        </td>
+    </tr>
+</script>
