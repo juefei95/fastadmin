@@ -1,0 +1,23 @@
+<!--@formatter:off-->
+{if stripos(config('cms.paytypelist'),'wechat')!==false}
+    <form action="{:addon_url('cms/order/submit')}" method="post" style="display:inline;" {if !$isWechat}target="_blank"{/if}>
+        <input type="hidden" name="id" value="{$__ARCHIVES__.id}">
+        <input type="hidden" name="paytype" value="wechat">
+        <button type="submit" class="btn btn-success btn-paynow"><i class="fa fa-wechat"></i> 微信支付</button>
+    </form>
+{/if}
+{if stripos(config('cms.paytypelist'),'alipay')!==false}
+    <form action="{:addon_url('cms/order/submit')}" method="post" style="display:inline;" {if !$isWechat}target="_blank"{/if}>
+        <input type="hidden" name="id" value="{$__ARCHIVES__.id}">
+        <input type="hidden" name="paytype" value="alipay">
+        <button type="submit" class="btn btn-primary btn-paynow"><i class="fa fa-money"></i> 支付宝支付</button>
+    </form>
+{/if}
+{if stripos(config('cms.paytypelist'),'balance')!==false}
+    <form action="{:addon_url('cms/order/submit')}" method="post" style="display:inline;">
+        <input type="hidden" name="id" value="{$__ARCHIVES__.id}">
+        <input type="hidden" name="paytype" value="balance">
+        <button type="submit" class="btn btn-warning btn-balance" data-url="{:addon_url('cms/order/submit')}" data-id="{$__ARCHIVES__.id}" data-price="{cms:archives name='price' /}"><i class="fa fa-dollar"></i> 余额支付</button>
+    </form>
+{/if}
+<!--@formatter:on-->

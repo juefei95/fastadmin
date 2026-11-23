@@ -1,0 +1,32 @@
+{php}
+$controllerName = explode('/', "[controlleraction]")[0];
+$cmsConfig = get_addon_config('cms');
+$suffix = $cmsConfig['moduleurlsuffix'][$controllerName]??$cmsConfig['urlsuffix'];
+$urlStr = addon_url("cms/[controlleraction]",[], $suffix, true);
+$sepStr = '[:diyname]';
+$urlArr = explode($sepStr, $urlStr);
+$urlArr = array_filter($urlArr);
+$valueStr = $row['diyname']??'';
+$valueStr = $valueStr == implode("", ["[","value","]"]) ? "" : $valueStr;
+{/php}
+<div class="form-group" data-field="diyname">
+    <label for="c-diyname" class="control-label col-xs-12 col-sm-2">{:__('Diyname')}:</label>
+    <div class="col-xs-12 col-sm-8">
+        {if stripos($urlStr, $sepStr)!==false}
+        <div class="input-group">
+            <div class="input-group-addon">
+                <span class="input-group-text">{$urlArr[0]|htmlentities}</span>
+            </div>
+            <input id="c-diyname" data-rule="required;diyname" class="form-control" name="row[diyname]" type="text" data-tip="用于伪静态中[:diyname]替换" style="min-width:80px;" value="{$valueStr|htmlentities}">
+            {if count($urlArr)>1}
+            <div class="input-group-addon" style="border-left:none;">
+                <span class="input-group-text">{$urlArr[1]|htmlentities}</span>
+            </div>
+            {/if}
+            <span class="msg-box n-right" for="c-diyname"></span>
+        </div>
+        {else/}
+        <input id="c-diyname" data-rule="diyname" class="form-control" name="row[diyname]" type="text" data-tip="用于伪静态中[:diyname]替换" value="{$valueStr|htmlentities}">
+        {/if}
+    </div>
+</div>

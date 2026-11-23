@@ -11,6 +11,7 @@
 !/addons/checkinlegacy/
 !/addons/code2yellow/
 !/addons/remotecontrol/
+!/addons/cms/
 /public/assets/libs/
 /public/assets/addons/*
 /public/uploads/*
