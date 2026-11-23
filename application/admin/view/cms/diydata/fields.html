@@ -1,0 +1,102 @@
+{foreach $fields as $item}
+
+<div class="form-group">
+    <div class="control-label col-xs-12 col-sm-2">{$item.title|htmlentities}</div>
+    <div class="col-xs-12 col-sm-8">
+        {switch $item.type}
+        {case string}
+        <input type="text" name="row[{$item.name|htmlentities}]" id="c-{$item.name|htmlentities}" value="{$item.value|htmlentities}" class="form-control" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" {$item.extend|htmlentities} />
+        {/case}
+        {case value="text" break="0"}{/case}
+        {case editor}
+        <textarea name="row[{$item.name|htmlentities}]" id="c-{$item.name|htmlentities}" class="form-control {eq name='$item.type' value='editor'}editor{/eq}" data-rule="{$item.rule|htmlentities}" rows="5" data-tip="{$item.tip|htmlentities}" {$item.extend|htmlentities}>{$item.value|htmlentities}</textarea>
+        {/case}
+        {case array}
+        {php}$arrList=isset($values[$item['name']])?(array)json_decode($item['value'],true):$item['content_list'];{/php}
+        <dl class="fieldlist" rel="{$arrList|count}" data-name="row[{$item.name|htmlentities}]">
+            <dd>
+                <ins>{:__('Array key')}</ins>
+                <ins>{:__('Array value')}</ins>
+            </dd>
+
+            {foreach $arrList as $key => $vo}
+            <dd class="form-inline">
+                <input type="text" name="row[{$item.name|htmlentities}][field][{$key|htmlentities}]" class="form-control" value="{$key|htmlentities}" size="10" />
+                <input type="text" name="row[{$item.name|htmlentities}][value][{$key|htmlentities}]" class="form-control" value="{$vo|htmlentities}" />
+                <span class="btn btn-sm btn-danger btn-remove"><i class="fa fa-times"></i></span>
+                <span class="btn btn-sm btn-primary btn-dragsort"><i class="fa fa-arrows"></i></span>
+            </dd>
+            {/foreach}
+            <dd><a href="javascript:;" class="append btn btn-sm btn-success"><i class="fa fa-plus"></i> {:__('Append')}</a></dd>
+        </dl>
+        {/case}
+        {case date}
+        <input type="text" name="row[{$item.name|htmlentities}]" id="c-{$item.name|htmlentities}" value="{$item.value|htmlentities}" class="form-control datetimepicker" data-date-format="YYYY-MM-DD" data-tip="{$item.tip|htmlentities}" data-rule="{$item.rule|htmlentities}" {$item.extend|htmlentities} />
+        {/case}
+        {case time}
+        <input type="text" name="row[{$item.name|htmlentities}]" id="c-{$item.name|htmlentities}" value="{$item.value|htmlentities}" class="form-control datetimepicker" data-date-format="HH:mm:ss" data-tip="{$item.tip|htmlentities}" data-rule="{$item.rule|htmlentities}" {$item.extend|htmlentities} />
+        {/case}
+        {case datetime}
+        <input type="text" name="row[{$item.name|htmlentities}]" id="c-{$item.name|htmlentities}" value="{$item.value|htmlentities}" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-tip="{$item.tip|htmlentities}" data-rule="{$item.rule|htmlentities}" {$item.extend|htmlentities} />
+        {/case}
+        {case number}
+        <input type="number" name="row[{$item.name|htmlentities}]" id="c-{$item.name|htmlentities}" value="{$item.value|htmlentities}" class="form-control" data-tip="{$item.tip|htmlentities}" data-rule="{$item.rule|htmlentities}" {$item.extend|htmlentities} />
+        {/case}
+        {case checkbox}
+        {foreach name="item.content_list" item="vo"}
+        <label for="row[{$item.name|htmlentities}][]-{$key|htmlentities}"><input id="row[{$item.name|htmlentities}][]-{$key|htmlentities}" name="row[{$item.name|htmlentities}][]" type="checkbox" value="{$key|htmlentities}" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" {in name="key" value="$item.value"}checked{/in} /> {$vo|htmlentities}</label>
+        {/foreach}
+        {/case}
+        {case radio}
+        {foreach name="item.content_list" item="vo"}
+        <label for="row[{$item.name|htmlentities}]-{$key|htmlentities}"><input id="row[{$item.name|htmlentities}]-{$key|htmlentities}" name="row[{$item.name|htmlentities}]" type="radio" value="{$key|htmlentities}" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" {in name="key" value="$item.value"}checked{/in} /> {$vo|htmlentities}</label>
+        {/foreach}
+        {/case}
+        {case value="select" break="0"}{/case}
+        {case value="selects"}
+        <select name="row[{$item.name|htmlentities}]{$item.type=='selects'?'[]':''}" class="form-control selectpicker" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}" {$item.extend|htmlentities} {$item.type=='selects'?'multiple':''}>
+            {foreach name="item.content_list" item="vo"}
+            <option value="{$key|htmlentities}" {in name="key" value="$item.value"}selected{/in}>{$vo|htmlentities}</option>
+            {/foreach}
+        </select>
+        {/case}
+        {case value="image" break="0"}{/case}
+        {case value="images"}
+        <div class="input-group">
+            <input id="c-{$item.name|htmlentities}" class="form-control" name="row[{$item.name|htmlentities}]" type="text" value="{$item.value|htmlentities}" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}">
+            <div class="input-group-addon no-border no-padding">
+                <span><button type="button" id="plupload-{$item.name|htmlentities}" class="btn btn-danger plupload" data-input-id="c-{$item.name|htmlentities}" data-preview-id="p-{$item.name|htmlentities}" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp,image/webp" data-multiple="{$item.type=='file'?'false':'true'}" {if $item.maximum}data-maxcount="{$item.maximum|htmlentities}"{/if}><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                <span><button type="button" id="fachoose-{$item.name|htmlentities}" class="btn btn-primary fachoose" data-input-id="c-{$item.name|htmlentities}" data-preview-id="p-{$item.name|htmlentities}" data-mimetype="image/*" data-multiple="{$item.type=='file'?'false':'true'}" {if $item.maximum}data-maxcount="{$item.maximum|htmlentities}"{/if}><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+            </div>
+            <span class="msg-box n-right" for="c-{$item.name|htmlentities}"></span>
+        </div>
+        <ul class="row list-inline plupload-preview" id="p-{$item.name|htmlentities}"></ul>
+        {/case}
+        {case value="file" break="0"}{/case}
+        {case value="files"}
+        <div class="input-group">
+            <input id="c-{$item.name|htmlentities}" class="form-control" name="row[{$item.name|htmlentities}]" type="text" value="{$item.value|htmlentities}" data-rule="{$item.rule|htmlentities}" data-tip="{$item.tip|htmlentities}">
+            <div class="input-group-addon no-border no-padding">
+                <span><button type="button" id="plupload-{$item.name|htmlentities}" class="btn btn-danger plupload" data-input-id="c-{$item.name|htmlentities}" data-multiple="{$item.type=='file'?'false':'true'}" {if $item.maximum}data-maxcount="{$item.maximum|htmlentities}"{/if}><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                <span><button type="button" id="fachoose-{$item.name|htmlentities}" class="btn btn-primary fachoose" data-input-id="c-{$item.name|htmlentities}" data-multiple="{$item.type=='file'?'false':'true'}" {if $item.maximum}data-maxcount="{$item.maximum|htmlentities}"{/if}><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+            </div>
+            <span class="msg-box n-right" for="c-{$item.name|htmlentities}"></span>
+        </div>
+        {/case}
+        {case switch}
+        <input id="c-{$item.name|htmlentities}" name="row[{$item.name|htmlentities}]" type="hidden" value="{:$item.value?1:0}">
+        <a href="javascript:;" data-toggle="switcher" class="btn-switcher" data-input-id="c-{$item.name|htmlentities}" data-yes="1" data-no="0" >
+            <i class="fa fa-toggle-on text-success {if !$item.value}fa-flip-horizontal text-gray{/if} fa-2x"></i>
+        </a>
+        {/case}
+        {case bool}
+        <label for="row[{$item.name|htmlentities}]-yes"><input id="row[{$item.name|htmlentities}]-yes" name="row[{$item.name|htmlentities}]" type="radio" value="1" {$item.value?'checked':''} data-tip="{$item.tip|htmlentities}" /> {:__('Yes')}</label>
+        <label for="row[{$item.name|htmlentities}]-no"><input id="row[{$item.name|htmlentities}]-no" name="row[{$item.name|htmlentities}]" type="radio" value="0" {$item.value?'':'checked'} data-tip="{$item.tip|htmlentities}" /> {:__('No')}</label>
+        {/case}
+        {case custom}
+        {$item.content|htmlentities}
+        {/case}
+        {/switch}
+    </div>
+</div>
+{/foreach}

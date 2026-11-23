@@ -1,0 +1,247 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <input type="hidden" name="row[source]" value="{$row.source|htmlentities}"/>
+    <input type="hidden" name="row[source_id]" value="{$row.source_id|htmlentities}"/>
+    <input type="hidden" name="row[oldname]" value="{$row.name|htmlentities}"/>
+    <div class="form-group">
+        <label for="c-name" class="control-label col-xs-12 col-sm-2">{:__('Name')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-name" data-rule="required; length(2~30); fieldname" class="form-control" name="row[name]" type="text" value="{$row.name|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-title" class="control-label col-xs-12 col-sm-2">{:__('Title')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-title" data-rule="required; length(~30)" class="form-control" name="row[title]" type="text" value="{$row.title|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-type" class="control-label col-xs-12 col-sm-2">{:__('Type')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <select name="row[type]" id="c-type" class="form-control selectpicker">
+                {volist name="typeList" id="type"}
+                <option value="{$key|htmlentities}" {if $row.type==$key}selected{/if}>{$type|htmlentities}</option>
+                {/volist}
+            </select>
+        </div>
+    </div>
+    <div class="form-group hidden tf tf-number">
+        <label for="c-decimals" class="control-label col-xs-12 col-sm-2">{:__('Decimals')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-decimals" class="form-control" name="row[decimals]" type="number" value="{$row.decimals|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group hidden tf tf-checkbox">
+        <label for="c-minimum" class="control-label col-xs-12 col-sm-2">{:__('Minimum')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-minimum" class="form-control" name="row[minimum]" type="number" value="{$row.minimum|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group hidden tf tf-selects tf-images tf-files tf-checkbox">
+        <label for="c-maximum" class="control-label col-xs-12 col-sm-2">{:__('Maximum')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-maximum" class="form-control" name="row[maximum]" type="number" value="{$row.maximum|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group hidden tf tf-selectpage tf-selectpages">
+        <label for="c-selectpage-table" class="control-label col-xs-12 col-sm-2">{:__('Selectpage table')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <select id="c-selectpage-table" name="row[setting][table]" class="form-control selectpicker" data-live-search="true">
+                <option value="">{:__('Please select table')}</option>
+                {foreach name="tableList" id="item"}
+                <option value="{$key|htmlentities}" data-subtext="{$item|htmlentities}" {if $row['setting'] && isset($row['setting']['table']) && $row['setting']['table']==$key}selected{/if}>{$key|htmlentities}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group hidden tf tf-selectpage tf-selectpages">
+        <label for="c-selectpage-primarykey" class="control-label col-xs-12 col-sm-2">{:__('Selectpage primarykey')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <select name="row[setting][primarykey]" class="form-control selectpicker" id="c-selectpage-primarykey" data-value="{$row.setting.primarykey|default=''}"></select>
+        </div>
+    </div>
+    <div class="form-group hidden tf tf-selectpage tf-selectpages">
+        <label for="c-selectpage-field" class="control-label col-xs-12 col-sm-2">{:__('Selectpage field')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <select name="row[setting][field]" class="form-control selectpicker" id="c-selectpage-field" data-value="{$row.setting.field|default=''}"></select>
+        </div>
+    </div>
+    <div class="form-group hidden tf tf-selectpage tf-selectpages">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Selectpage conditions')}:</label>
+        <div class="col-xs-12 col-sm-10">
+            <table class="table fieldlist" data-template="selectpagetpl" data-name="row[setting][conditions]" id="selectpage-table">
+                <tr>
+                    <td>{:__('筛选字段')}</td>
+                    <td>{:__('操作符')}</td>
+                    <td>{:__('筛选值')} <a href="javascript:" data-toggle="tooltip" data-title='支持{user_id}和{admin_id}占位替换'><i class="fa fa-info-circle"></i></a></td>
+                    <td width="100"></td>
+                </tr>
+                <tr>
+                    <td colspan="4"><a href="javascript:;" class="btn btn-sm btn-success btn-append"><i class="fa fa-plus"></i> {:__('Append')}</a></td>
+                </tr>
+            </table>
+            <textarea name="row[setting][conditions]" class="form-control hide" cols="30" rows="5">{$row.setting.conditions|default=''}</textarea>
+        </div>
+    </div>
+    <div class="form-group hidden tf tf-array">
+        <label for="c-array-key" class="control-label col-xs-12 col-sm-2">{:__('Array key')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input type="text" name="row[setting][key]" class="form-control" id="c-array-key" value="{$row.setting.key|default=''}">
+        </div>
+    </div>
+    <div class="form-group hidden tf tf-array">
+        <label for="c-array-value" class="control-label col-xs-12 col-sm-2">{:__('Array value')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input type="text" name="row[setting][value]" class="form-control" id="c-array-value" value="{$row.setting.value|default=''}">
+        </div>
+    </div>
+    <div class="form-group hidden tf tf-radio tf-checkbox tf-select tf-selects tf-array">
+        <label for="c-content" class="control-label col-xs-12 col-sm-2">{:__('Content List')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <dl class="fieldlist" data-name="row[content]">
+                <dd>
+                    <ins>{:__('Json key')}</ins>
+                    <ins>{:__('Json value')}</ins>
+                </dd>
+                <dd><a href="javascript:;" class="btn btn-sm btn-success btn-append"><i class="fa fa-plus"></i> {:__('Append')}</a></dd>
+                <textarea id="c-content" data-rule="required" class="form-control hidden" name="row[content]">{$row.content_list|json_encode}</textarea>
+            </dl>
+        </div>
+    </div>
+    {if in_array($row.source, ['model', 'diyform', 'archives'])}
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Isfilter')}:</label>
+
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-isfilter" name="row[isfilter]" type="hidden" value="{$row.isfilter|htmlentities}">
+            <a href="javascript:;" data-toggle="switcher" class="btn-switcher" data-input-id="c-isfilter" data-yes="1" data-no="0">
+                <i class="fa fa-toggle-on text-success {eq name=" $row.isfilter" value="0"}fa-flip-horizontal text-gray{/eq} fa-2x"></i>
+            </a>
+        </div>
+    </div>
+    <div class="form-group {if !$row.isfilter}hidden{/if}" id="filterdom">
+        <label for="c-filterlist" class="control-label col-xs-12 col-sm-2">{:__('Filterlist')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <dl class="fieldlist" data-name="row[filterlist]">
+                <dd>
+                    <ins>{:__('Filter key')}</ins>
+                    <ins>{:__('Filter value')}</ins>
+                </dd>
+                <dd><a href="javascript:;" class="btn btn-sm btn-success btn-append"><i class="fa fa-plus"></i> {:__('Append')}</a></dd>
+                <textarea id="c-filterlist" data-rule="required" class="form-control hidden" name="row[filterlist]">{$row.filterlist_list|json_encode}</textarea>
+            </dl>
+            <div style="margin-top:5px;" class="text-muted"><span class="hidden tf tf-radio tf-checkbox tf-select tf-selects tf-array">为空时将使用数据列表，</span>用于前台列表筛选使用</div>
+        </div>
+    </div>
+    {/if}
+    <div class="form-group">
+        <label for="c-defaultvalue" class="control-label col-xs-12 col-sm-2">{:__('Defaultvalue')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-defaultvalue" class="form-control" name="row[defaultvalue]" type="text" value="{$row.defaultvalue|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-defaultvalue" class="control-label col-xs-12 col-sm-2">{:__('Favisible')}:</label>
+        <div class="col-xs-12 col-sm-10">
+            <table class="table fieldlist" data-template="favisibletpl" data-name="row[favisible]" id="favisible-table">
+                <tr>
+                    <td>{:__('条件字段')}</td>
+                    <td>{:__('操作符')}</td>
+                    <td>{:__('条件值')} <a href="javascript:" data-toggle="tooltip" data-title='不支持{user_id}和{admin_id}占位替换'><i class="fa fa-info-circle text-danger"></i></a></td>
+                    <td width="100"></td>
+                </tr>
+                <tr>
+                    <td colspan="4"><a href="javascript:;" class="btn btn-sm btn-success btn-append"><i class="fa fa-plus"></i> {:__('Append')}</a></td>
+                </tr>
+            </table>
+            <textarea name="row[favisible]" class="form-control hide" cols="30" rows="5">{$row.favisible|default=''|htmlentities}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-rule" class="control-label col-xs-12 col-sm-2">{:__('Rule')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-rule" class="form-control selectpage" data-source="cms/fields/rulelist" data-multiple="true" name="row[rule]" type="text" value="{$row.rule|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-msg" class="control-label col-xs-12 col-sm-2">{:__('Validate Msg')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-msg" class="form-control" name="row[msg]" type="text" value="{$row.msg|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-ok" class="control-label col-xs-12 col-sm-2">{:__('Validate Ok')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-ok" class="form-control" name="row[ok]" type="text" value="{$row.ok|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-tip" class="control-label col-xs-12 col-sm-2">{:__('Validate Tip')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-tip" class="form-control" name="row[tip]" type="text" value="{$row.tip|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-length" class="control-label col-xs-12 col-sm-2">{:__('Length')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-length" data-rule="required" class="form-control" name="row[length]" type="number" value="{$row.length|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Isorder')}:</label>
+
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-isorder" name="row[isorder]" type="hidden" value="{$row.isorder|htmlentities}">
+            <a href="javascript:;" data-toggle="switcher" class="btn-switcher" data-input-id="c-isorder" data-yes="1" data-no="0">
+                <i class="fa fa-toggle-on text-success {eq name=" $row.isorder" value="0"}fa-flip-horizontal text-gray{/eq} fa-2x"></i>
+            </a>
+        </div>
+    </div>
+    {if in_array($row.source, ['model', 'diyform'])}
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Iscontribute')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-iscontribute" name="row[iscontribute]" type="hidden" value="{$row.iscontribute|htmlentities}">
+            <a href="javascript:;" data-toggle="switcher" class="btn-switcher" data-input-id="c-iscontribute" data-yes="1" data-no="0">
+                <i class="fa fa-toggle-on text-success {eq name=" $row.iscontribute" value="0"}fa-flip-horizontal text-gray{/eq} fa-2x"></i>
+            </a>
+        </div>
+    </div>
+    {/if}
+
+    {if false}
+    <div class="form-group">
+        <label for="c-extend" class="control-label col-xs-12 col-sm-2">{:__('Extend')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-extend" class="form-control" name="row[extend]" placeholder="{:__('Extend tips')}" data-tip="{:__('Extend tips')}">{$row.extend|htmlentities}</textarea>
+        </div>
+    </div>
+    {/if}
+
+    <div class="form-group">
+        <label for="c-weigh" class="control-label col-xs-12 col-sm-2">{:__('Weigh')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-weigh" data-rule="required" class="form-control" name="row[weigh]" type="number" value="{$row.weigh|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+
+            <div class="radio">
+                {foreach name="statusList" item="vo"}
+                <label for="row[status]-{$key|htmlentities}"><input id="row[status]-{$key|htmlentities}" name="row[status]" type="radio" value="{$key|htmlentities}" {in name="key" value="$row.status" }checked{/in} /> {$vo|htmlentities}</label>
+                {/foreach}
+            </div>
+
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-primary btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+{include file="cms/common/conditions"}
