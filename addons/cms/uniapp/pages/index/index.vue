@@ -16,7 +16,7 @@
 			<u-tabs :list="tabList" :active-color="theme.bgColor" :bar-width="tabwidth" name="title" :is-scroll="true" :current="current" @change="change"></u-tabs>
 		</view>
 		<!-- 轮播图 -->
-		<view class="" v-if="is_show">
+		<view class="" v-if="is_show && bannerList.length">
 			<u-swiper :title="true" border-radius="0" height="320" :list="bannerList" @click="openPage"></u-swiper>
 		</view>
 		<!-- 列表 -->
