@@ -18,7 +18,7 @@ return [
     // 应用命名空间
     'app_namespace'          => 'app',
     // 生成链接时使用的公网域名
-    'app_host'               => 'https://frpapi.zhenhaiedu.top',
+    'app_host'               => 'http://127.0.0.1',
     // 应用调试模式
     'app_debug'              => Env::get('app.debug', false),
     // 应用Trace
