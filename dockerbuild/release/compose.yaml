@@ -27,10 +27,9 @@ services:
         condition: service_healthy
     volumes:
       - ../../:/app
-      - ld-backend-paw-chess-release-uploads:/app/public/uploads
-      - ld-backend-paw-chess-release-runtime:/app/runtime
     command: >
       bash -c "
+        mkdir -p /app/public/uploads /app/runtime &&      
         chmod -R 777 /app/public/uploads &&
         chmod -R 777 /app/runtime &&      
         exec supervisord
@@ -61,5 +60,3 @@ services:
 
 volumes:
   ld-backend-paw-chess-release-mysql-data:
-  ld-backend-paw-chess-release-runtime:
-  ld-backend-paw-chess-release-uploads:
