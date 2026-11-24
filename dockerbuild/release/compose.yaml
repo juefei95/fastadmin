@@ -27,10 +27,9 @@ services:
         condition: service_healthy
     volumes:
       - ../../:/app
-      - fastadmin-rustdesk-release-uploads:/app/public/uploads
-      - fastadmin-rustdesk-release-runtime:/app/runtime
     command: >
       bash -c "
+        mkdir -p /app/public/uploads /app/runtime &&      
         chmod -R 777 /app/public/uploads &&
         chmod -R 777 /app/runtime &&      
         exec supervisord
@@ -61,5 +60,3 @@ services:
 
 volumes:
   fastadmin-rustdesk-release-mysql-data:
-  fastadmin-rustdesk-release-runtime:
-  fastadmin-rustdesk-release-uploads:
